@@ -101,7 +101,12 @@
             //Q logic
             if (useQ && Q.Ready && Menu["combo"]["useqon" + target.ChampionName.ToLower()].Enabled && target.IsValidTarget(Q.Range))
             {
-                Q.Cast(target);
+                var prediction = Q.GetPrediction(target);
+                if (prediction.HitChance >= HitChance.High)
+                {
+                    Q.Cast(target);
+                }
+                
             }
 
             //E logic - Avoid using E on already knocked up target
