@@ -20,9 +20,9 @@
                     var Blitzcrank = new Blitzcrank();
                     break;
 
-                case "Nidalee":
+                /*case "Nidalee":
                      var Nidalee = new Nidalee();
-                    break;
+                    break;*/
 
                 default: Console.WriteLine("Champion not supported.");
                     break;
