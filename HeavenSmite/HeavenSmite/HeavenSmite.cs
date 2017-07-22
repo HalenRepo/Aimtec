@@ -29,7 +29,7 @@ namespace HeavenSmiteReborn
         {
             Smite = new Spell(Player.SpellBook.Spells.FirstOrDefault(spell => spell.Name.Contains("Smite")).Slot, 500);
 
-            Menu.Add(new MenuKeyBind("Key", "Auto Smite:", Aimtec.SDK.Util.KeyCode.H, KeybindType.Toggle));
+            Menu.Add(new MenuKeyBind("Key", "Auto Smite:", Aimtec.SDK.Util.KeyCode.M, KeybindType.Toggle));
 
             var Dragons = new Menu("Dragons", "Dragons");
             {
