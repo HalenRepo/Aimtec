@@ -104,7 +104,7 @@
                 var prediction = Q.GetPrediction(target);
                 if (prediction.HitChance >= HitChance.High)
                 {
-                    Q.Cast(prediction.CastPosition);
+                    Q.Cast(prediction.UnitPosition);
                 }
                 
             }

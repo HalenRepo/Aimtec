@@ -51,7 +51,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Champions\Blitzcrank\Blitzcrank.cs" />
+    <Compile Include="Champions\Lulu\Lulu.cs" />
     <Compile Include="Champions\Nidalee\Nidalee.cs" />
+    <Compile Include="Champions\Thresh\Thresh.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
