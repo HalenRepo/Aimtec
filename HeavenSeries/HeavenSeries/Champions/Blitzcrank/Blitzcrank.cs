@@ -99,12 +99,12 @@
             var target = TargetSelector.GetTarget(Q.Range);
 
             //Q logic
-            if (useQ && Q.Ready && Menu["combo"]["useqon" + target.ChampionName.ToLower()].Enabled && target.IsValidTarget(Q.Range))
+            if (useQ && Q.Ready && Menu["combo"]["useqon" + target.ChampionName.ToLower()].Enabled && target.IsValidTarget(Q.Range) && target != null)
             {
                 var prediction = Q.GetPrediction(target);
                 if (prediction.HitChance >= HitChance.High)
                 {
-                    Q.Cast(target);
+                    Q.Cast(prediction.CastPosition);
                 }
                 
             }

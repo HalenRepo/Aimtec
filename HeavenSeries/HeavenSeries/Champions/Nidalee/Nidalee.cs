@@ -3,6 +3,7 @@
     using System;
     using System.Drawing;
     using System.Linq;
+    using System.Collections.Generic;
 
     using Aimtec;
     using Aimtec.SDK.Damage;
@@ -35,7 +36,7 @@
         //Transform
         public static Spell AspectofCougar = new Spell(SpellSlot.R);
 
-        public static bool Cat;
+        public static bool Cat = false;
 
 
         public Nidalee()
@@ -45,9 +46,15 @@
             var ComboMenu = new Menu("combo", "Combo");
             {
                 ComboMenu.Add(new MenuBool("useq", "Use Q"));
-                
+                ComboMenu.Add(new MenuSliderBool("comboW", "Use Human W (trap) to Combo with % Minimum Mana", true, 50, 0, 99));
             }
             Menu.Add(ComboMenu);
+            var JungleMenu = new Menu("jungle", "Jungle");
+            {
+                JungleMenu.Add(new MenuSliderBool("jungleclearQ", "Use Cougar Q (spear) to Jungle with % Minimum Mana", true, 10, 0, 99));
+                JungleMenu.Add(new MenuSliderBool("jungleclearW", "Use Human W (trap) to Jungle with % Minimum Mana", true, 10, 0, 99));
+            }
+            Menu.Add(JungleMenu);
             Menu.Attach();
 
             Javelin.SetSkillshot(0.50f, 70f, 1300f, true, SkillshotType.Line);
@@ -70,11 +77,13 @@
                 return;
             }
 
-            Cat = SpellSlot.Q.ToString() != "JavelinToss";
+            //Credits to Dycaste for isMelee suggestion
+            Cat = ObjectManager.GetLocalPlayer().IsMelee;
+            
             if (Player.HasBuff("Takedown"))
             {
                 var target = TargetSelector.GetTarget(Javelin.Range);
-                if (target.IsValidTarget(Takedown.Range))
+                if (target != null && target.IsValidTarget(Takedown.Range))
                 {
                     if (Orbwalker.Mode == OrbwalkingMode.Combo && Cat)
                     {
@@ -88,6 +97,14 @@
                 case OrbwalkingMode.Combo:
                     Combo();
                     break;
+
+                case OrbwalkingMode.Mixed:
+                    Mixed();
+                    break;
+
+                case OrbwalkingMode.Laneclear:
+                    Laneclear();
+                    break;
             }
 
             //TODO: Killsteal();
@@ -95,13 +112,14 @@
 
         private static void Render_OnPresent()
         {
-            if (Cat)
+            if (!Cat)
             {
                 Render.Circle(Player.Position, Javelin.Range, 30, Color.White);
             }
            
         }
 
+        //For hunted markings
         public static bool TargetHunted(Obj_AI_Base target)
         {
             return target.HasBuff("nidaleepassivehunted"); //For markings
@@ -112,110 +130,163 @@
         {
             //Store boolean value of menu items
 
-            bool useQ = Menu["combo"]["useq"].Enabled;
+            //bool useQ = Menu["combo"]["useq"].Enabled;
             var target = TargetSelector.GetTarget(Javelin.Range);
-
-            if (Cat)
+            var prediction = Javelin.GetPrediction(target);
+            var manaPercent = (int)((Player.Mana / Player.MaxMana) * 100);
+            //Human Q logic
+            if (target != null && !Cat && Javelin.Ready && target.IsValidTarget(Javelin.Range))
             {
-                //Takedown logic
-                if (target.IsValidTarget(Takedown.Range))
+               
+                if (prediction.HitChance >= HitChance.High)
                 {
-                    //Check if takedown is ready on unit
-                    if (Takedown.Ready && target.Distance(Player.ServerPosition) <= Takedown.Range + 150 * 150) //Takedown.RangeSqr not exist
+                    Javelin.Cast(prediction.CastPosition);
+                }
+
+            }
+
+            if (target != null && !Cat && Bushwack.Ready && Menu["combo"]["comboW"].Enabled && manaPercent >= Menu["combo"]["comboW"].Value)
+            {
+                Bushwack.Cast(target);
+            }
+
+            if (target != null && Pounce.Ready && (target.DistanceSqr(Player.Position)) > 200*200)
+            {
+                if (TargetHunted(target) & target.DistanceSqr(Player.Position) <= 750*750)
+                {
+                    if (Takedown.Ready)
+                    {
+                        //Then use takedown then pounce for best combo
+                        Takedown.CastOnUnit(Player);
+
+                    }
+                    Pounce.Cast(target.ServerPosition);
+                }
+                else if (target.DistanceSqr(Player.Position) <= 400*400)
+                {
+                    if (Takedown.Ready)
                     {
                         Takedown.CastOnUnit(Player);
                     }
-                }
-
-                //Pounce logic
-                if (Pounce.Ready && (target.Distance(Player.ServerPosition) <= 200*200))
-                {
-                    //Check to see if the unit Nidalee is pouncing on is "hunted"/marked, then use takedown if possible! 
-                    //Single ampersand '&' BITWISE operator!
-                    if (TargetHunted(target) & target.Distance(Player.ServerPosition) <= 750*750)
-                    {
-                        if (Takedown.Ready)
-                        {
-                            //Then use takedown then pounce for best combo
-                            Takedown.CastOnUnit(Player);
-                        }
-                        Pounce.Cast(target.ServerPosition);
-                    }
-                    else if (target.Distance(Player.ServerPosition) <= 400*400)
-                    {
-                        if (Takedown.Ready)
-                        {
-                            Takedown.CastOnUnit(Player);
-                        }
-                        Pounce.Cast(target.ServerPosition);
-                    }
-                    
-                }
-
-                //Swipe logic
-                if (Swipe.Ready)
-                {
-                    if (target.Distance(Player.ServerPosition) <= Swipe.Range) //Swipe.RangeSqr not exist
-                    {
-                        if (!Pounce.Ready) //NotLearned is another method we need to make. You'd assume IsReady() would account for this...
-                            Swipe.Cast(target.ServerPosition);
-                    }
+                    Pounce.Cast(target.ServerPosition);
                 }
             }
 
-            //Cougar to human check
-            //force transform if q ready and no collision 
-            //Maybe add a check here to see if user wants to auto transform?
-            //Check if can change forms...
-            if (!AspectofCougar.Ready)
+            if (target != null && Cat && Swipe.Ready && target.Distance(Player.ServerPosition) <= Swipe.Range)
             {
-                return;
+                Swipe.Cast(target.ServerPosition);
             }
 
-            //OR Don't transform and stay cougar if target killable with combo
-            //NEED TO IMPLEMENT COUGARDAMAGE() - A TOTAL AMOUNT OF DAMAGE IN COUGAR FORM
-            /* if (target.Health <= CougarDamage(target) && target.Distance(Player.ServerPosition) <= Pounce.Range)
-             {
-                 return;
-             }*/
+
+            //Switch to cat form
+            if (target != null && Cat && target.IsValidTarget(Javelin.Range) && TargetHunted(target))
+            {
+                if (AspectofCougar.Ready)
+                    AspectofCougar.Cast();
+            }
 
             //If spear is likely to hit via prediction, then switch forms!
-            var prediction = Javelin.GetPrediction(target);
+
             if (prediction.HitChance >= HitChance.Medium && !Pounce.Ready)
             {
-                AspectofCougar.Cast();
+                if (AspectofCougar.Ready)
+                    AspectofCougar.Cast();
             }
 
-            //COUGAR to HUMAN if AA Killable and COUGAR skills on CD
-            //Switch to human form if killable with aa and cougar skills not available
-            /* if (!Pounce.Ready && !Swipe.Ready() && !Takedown.Ready)
-             {
-                 if (target.Distance(Player.ServerPosition) > Takedown.Range && target.Health <= CanKillAA(target)) //CanKillAA() method
-                 {
-                     //Maybe also add a check for menu. Does user want auto transform?
-                     if (target.Distance(Player.ServerPosition, true) <= Math.Pow(Me.AttackRange + 50, 2))
-                     {
-                         if (Aspectofcougar.IsReady())
-                             Aspectofcougar.Cast();
-                     }
-                 }
-             }*/
-
-            //Human Q logic
-            if (!Cat && target.IsValidTarget(Javelin.Range))
+            //Switch to human for aa
+            if (target != null && Cat && target.IsValidTarget(Javelin.Range) && !Takedown.Ready && !Pounce.Ready)
             {
-                var qTarget = TargetSelector.GetTarget(Javelin.Range, false);
-                if (qTarget != null && Javelin.Ready) //if there is actually a target you can hit a spear on with no collision
+                if (AspectofCougar.Ready)
+                    AspectofCougar.Cast();
+            }
+
+        }
+
+        private void Mixed()
+        {
+            var target = TargetSelector.GetTarget(Javelin.Range);
+            //Human Q logic
+            if (target != null && Javelin.Ready && target.IsValidTarget(Javelin.Range))
+            {
+                var prediction = Javelin.GetPrediction(target);
+                if (prediction.HitChance >= HitChance.High)
                 {
-                    Javelin.Cast(qTarget); //Kurisu added a hitchance slider and checked to see if the chance was enough to make it worth casting
+                    Javelin.Cast(prediction.CastPosition);
+                }
+
+            }
+        }
+
+        private void Laneclear()
+        {
+            //Get mana %
+            var manaPercent = (int)((Player.Mana / Player.MaxMana) * 100);
+
+            //All creeps and jungle minus plants
+            var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsInRange(Javelin.Range) && x.IsEnemy && x.Name != "PlantSatchel" && x.Name != "PlantVision" && x.Name != "PlantHealth");
+            var target = minions.FirstOrDefault(x => x.IsInRange(Player.AttackRange));
+
+            //Switch to human for aa
+            if (target != null && Cat && !Takedown.Ready && !Pounce.Ready && !Javelin.Ready && !Swipe.Ready)
+            {
+                
+                if (AspectofCougar.Ready)
+                {
+                    AspectofCougar.Cast();
+                }
+                    
+            }
+
+            if (Menu["jungle"]["jungleclearQ"].Enabled && manaPercent >= Menu["jungle"]["jungleclearQ"].Value)
+            {
+                if (Javelin.Ready && target != null)
+                {
+                    Javelin.Cast(target);
+                }
+
+
+            } else
+            {
+                if (target != null && !Cat && target.IsValidTarget(Javelin.Range))
+                {
+                    if (AspectofCougar.Ready)
+                        AspectofCougar.Cast();
                 }
             }
 
-            //Q logic
-            /* if (useQ && Javelin.Ready && Menu["combo"]["useqon" + target.ChampionName.ToLower()].Enabled && target.IsValidTarget(Javelin.Range))
-             {
-                 Javelin.Cast(target);
-             }*/
+            if (target != null && !Cat && Bushwack.Ready && Menu["jungle"]["jungleclearW"].Enabled && manaPercent >= Menu["jungle"]["jungleclearW"].Value)
+            {
+                Bushwack.Cast(target);
+            }
+
+            //Switch to cat form
+            if (target != null && !Cat && target.IsValidTarget(Javelin.Range))
+            {
+                if (AspectofCougar.Ready)
+                {
+                    AspectofCougar.Cast();
+                }
+            }
+
+            if (Cat)
+            {
+                if (Takedown.Ready && target != null)
+                {
+                    Takedown.CastOnUnit(Player);
+                }
+
+                if (Pounce.Ready && target != null)
+                {
+                    Pounce.Cast(target.ServerPosition);
+                }
+
+                if (Swipe.Ready && target != null)
+                {
+                    Swipe.Cast(target.ServerPosition);
+                }
+            }
+
+            
         }
     }
 
