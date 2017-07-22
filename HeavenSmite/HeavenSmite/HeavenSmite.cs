@@ -1,7 +1,7 @@
-﻿
-using System.Linq;
+﻿using System.Linq;
 
 using Aimtec;
+using Spell = Aimtec.SDK.Spell;
 using Aimtec.SDK.Extensions;
 using Aimtec.SDK.Menu;
 using Aimtec.SDK.Menu.Components;
@@ -11,157 +11,83 @@ namespace HeavenSmiteReborn
     internal class HeavenSmite
     {
         public static Menu Menu = new Menu("HeavenSmite", "HeavenSmite", true);
-        public static Obj_AI_Hero Player => ObjectManager.GetLocalPlayer();
+        private static Obj_AI_Hero Player => ObjectManager.GetLocalPlayer();
+        private static int SmiteDamages
+        {
+            get
+            {
+                int[] Dmg = new int[] { 390, 410, 430, 450, 480, 510, 540, 570, 600, 640, 680, 720, 760, 800, 850, 900, 950, 1000 };
+
+                return Dmg[Player.Level - 1];
+            }
+        }
+
+        private static Spell Smite;
+        private static string[] pMobs = new string[] { "SRU_Baron", "SRU_Blue", "SRU_Red", "SRU_RiftHerald" };
 
         public HeavenSmite()
         {
-            var SmiteMenu = new Menu("smite", "Auto Smite");
+            Smite = new Spell(Player.SpellBook.Spells.FirstOrDefault(spell => spell.Name.Contains("Smite")).Slot, 500);
+
+            Menu.Add(new MenuKeyBind("Key", "Auto Smite:", Aimtec.SDK.Util.KeyCode.H, KeybindType.Toggle));
+
+            var Dragons = new Menu("Dragons", "Dragons");
             {
-                SmiteMenu.Add(new MenuBool("autosmite", "Auto Smite Enabled"));
-                SmiteMenu.Add(new MenuBool("smiteepic", "Smite Epic"));
-                SmiteMenu.Add(new MenuBool("smiteblue", "Smite Blue"));
-                SmiteMenu.Add(new MenuBool("smitered", "Smite Red"));
-                SmiteMenu.Add(new MenuBool("smitegromp", "Smite Gromp"));
-                SmiteMenu.Add(new MenuBool("smitewolf", "Smite Wolf"));
-                SmiteMenu.Add(new MenuBool("smiteraptor", "Smite Raptor"));
-                SmiteMenu.Add(new MenuBool("smitegolem", "Smite Golem"));
-                SmiteMenu.Add(new MenuBool("smitecrab", "Smite Scuttle Crab"));
+                Dragons.Add(new MenuBool("SRU_Dragon_Air", "Air Dragon?"));
+                Dragons.Add(new MenuBool("SRU_Dragon_Fire", "Fire Dragon?"));
+                Dragons.Add(new MenuBool("SRU_Dragon_Earth", "Earth Dragon?"));
+                Dragons.Add(new MenuBool("SRU_Dragon_Water", "Water Dragon?"));
+                Dragons.Add(new MenuBool("SRU_Dragon_Elder", "Elder Dragon?"));
+            };
+            Menu.Add(Dragons);
+            var Big = new Menu("BigMobs", "Big Mobs");
+            {
+                Big.Add(new MenuBool("SRU_Baron", "Baron?"));
+                Big.Add(new MenuBool("SRU_Blue", "Blue?"));
+                Big.Add(new MenuBool("SRU_Red", "Red?"));
+                Big.Add(new MenuBool("SRU_RiftHerald", "Rift Herald?"));
             }
-            Menu.Add(SmiteMenu);
+            Menu.Add(Big);
+            var Small = new Menu("SmallMobs", "Small Mobs");
+            {
+                Small.Add(new MenuBool("SRU_Gromp", "Gromp?"));
+                Small.Add(new MenuBool("SRU_Murkwolf", "Wolves?"));
+                Small.Add(new MenuBool("SRU_Krug", "Krug?"));
+                Small.Add(new MenuBool("SRU_Razorbeak", "Razor?"));
+                Small.Add(new MenuBool("Sru_Crab", "Crab?"));
+            }
+            Menu.Add(Small);
             Menu.Attach();
 
-
-
-            Game.OnUpdate += Game_OnUpdate;
-        }
-
-        public int[] SmiteDamages = new[] { 390, 410, 430, 450, 480, 510, 540, 570, 600, 640, 680, 720, 760, 800, 850, 900, 950, 1000 };
-        public int SmiteDamage
-        {
-            get { return SmiteDamages[Player.Level - 1]; }
-        }
-
-        private void Game_OnUpdate()
-        {
-            if (Player.IsDead || MenuGUI.IsChatOpen())
+            Game.OnUpdate += delegate
             {
-                return;
-            }
-
-            /*SpellSlot smiteSlot = Player.SpellBook.Spells
-               .FirstOrDefault(spell => spell.Name.Equals("summonerSmite", StringComparison.OrdinalIgnoreCase)).Slot;*/
-
-            SpellSlot smiteSlot = Player.SpellBook.Spells.FirstOrDefault(spell => spell.Name.Contains("Smite")).Slot;
-
-
-
-            var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsInRange(500) && x.Name != "PlantSatchel" && x.Name != "PlantVision" && x.Name != "PlantHealth" && x.IsEnemy && SmiteDamage >= x.Health && x.IsValidTarget()).OrderBy(x => x.Health);
-            var target = minions.FirstOrDefault(x => x.IsInRange(500));
-
-            /*bool smiteBaron = Menu["smite"]["smitebaron"].Enabled;
-            bool smiteDragon = Menu["smite"]["smitedragon"].Enabled;
-            bool smiteRed = Menu["smite"]["smitered"].Enabled; //SRU_Red
-            bool smiteBlue = Menu["smite"]["smiteblue"].Enabled; //SRU_Blue
-            bool smiteGromp = Menu["smite"]["smitegromp"].Enabled; //SRU_Gromp
-            bool smiteWolf = Menu["smite"]["smitewolf"].Enabled; //SRU_MurkWolf
-            bool smiteRaptor = Menu["smite"]["smiteraptor"].Enabled; //SRU_Razorbeak
-            bool smiteGolem = Menu["smite"]["smitegolem"].Enabled;*/ //SRU_Krug
-
-
-
-            if (target != null)
-            {
-
-                //Don't smite minions... lol
-                if (target.UnitSkinName.ToString().Contains("Minion") || target.UnitSkinName.ToString().Contains("Plant") || target.UnitSkinName.ToString().Contains("Mini"))
-                {
-
+                if (Player.IsDead && !Smite.Ready)
                     return;
-                }
-                else
+
+                if (!Menu["Key"].Enabled)
+                    return;
+
+                foreach (var Obj in ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamages >= x.Health))
                 {
-                    bool shouldSmite = true;
-                    switch (target.UnitSkinName)
+                    if (Obj.UnitSkinName.StartsWith("SRU_Dragon"))
                     {
-
-                        case "SRU_Red":
-                            if (!Menu["smite"]["smitered"].Enabled)
-                            {
-                                shouldSmite = false;
-                                return;
-                            }
-                            break;
-
-                        case "SRU_Blue":
-                            if (!Menu["smite"]["smiteblue"].Enabled)
-                            {
-                                shouldSmite = false;
-                                return;
-                            }
-                            break;
-
-                        case "SRU_Gromp":
-                            if (!Menu["smite"]["smitegromp"].Enabled)
-                            {
-                                shouldSmite = false;
-                                return;
-                            }
-                            break;
-
-                        case "SRU_MurkWolf":
-                            if (!Menu["smite"]["smitewolf"].Enabled)
-                            {
-                                shouldSmite = false;
-                                return;
-                            }
-                            break;
-
-                        case "SRU_Razorbeak":
-                            if (!Menu["smite"]["smiteraptor"].Enabled)
-                            {
-                                shouldSmite = false;
-                                return;
-                            }
-                            break;
-
-                        case "SRU_Krug":
-                            if (!Menu["smite"]["smitegolem"].Enabled)
-                            {
-                                shouldSmite = false;
-                                return;
-                            }
-                            break;
-
-                        case "SRU_Crab":
-                            if (!Menu["smite"]["smitecrab"].Enabled)
-                            {
-                                shouldSmite = false;
-                                return;
-                            }
-                            break;
-
-                        default:
-                            if (!Menu["smite"]["smiteepic"].Enabled)
-                            {
-                                shouldSmite = false;
-                                return;
-                            }
-                            break;
-
+                        if (Menu["Dragons"][Obj.UnitSkinName].Enabled)
+                            Smite.Cast(Obj);
                     }
 
+                    if (pMobs.Contains(Obj.UnitSkinName))
+                    {
+                        if (Menu["BigMobs"][Obj.UnitSkinName].Enabled)
+                            Smite.Cast(Obj);
+                    }
 
-                    // Console.WriteLine("Smiting - " + target.UnitSkinName);
-                    if (shouldSmite == true)
-                        Player.SpellBook.CastSpell(smiteSlot, target);
+                    if (!pMobs.Contains(Obj.UnitSkinName) && !Obj.UnitSkinName.StartsWith("SRU_Dragon"))
+                    {
+                        if (Menu["SmallMobs"][Obj.UnitSkinName].Enabled)
+                            Smite.Cast(Obj);
+                    }
                 }
-
-
-            }
-
-
-
+            };
         }
     }
-
 }
