@@ -15,6 +15,7 @@
 
     using Spell = Aimtec.SDK.Spell;
     using Aimtec.SDK.Prediction.Skillshots;
+    using System.Collections.Generic;
 
     internal class Soraka
     {
@@ -27,6 +28,8 @@
         public static Spell E = new Spell(SpellSlot.E, 925);
         public static Spell R = new Spell(SpellSlot.R);
 
+        public static IOrbwalker IOrbwalker = Orbwalker.Implementation;
+
         public Soraka()
         {
             Orbwalker.Attach(Menu);
@@ -35,7 +38,6 @@
             {
                 ComboMenu.Add(new MenuBool("useq", "Use Q"));
                 ComboMenu.Add(new MenuBool("usee", "Use E "));
-                
             }
             Menu.Add(ComboMenu);
             var HealAllies = new Menu("healallies", "Auto Heal (W)");
@@ -44,7 +46,12 @@
                 HealAllies.Add(new MenuSlider("autowhealth", "Keep Soraka Health above x% ", 10, 1, 99, false));
                 HealAllies.Add(new MenuSeperator("sep1", "Minimum HP%: "));
                 foreach (Obj_AI_Hero ally in GameObjects.AllyHeroes)
-                    HealAllies.Add(new MenuSliderBool(ally.ChampionName.ToLower(), ally.ChampionName, true, 75, 1, 99, false));
+                {
+                    //Don't include Soraka herself as well in Auto W
+                    if (!ally.IsMe)
+                        HealAllies.Add(new MenuSliderBool(ally.ChampionName.ToLower(), ally.ChampionName, true, 75, 1, 99, false));
+                }
+                    
             }
             Menu.Add(HealAllies);
 
@@ -56,6 +63,12 @@
                     UltAllies.Add(new MenuSliderBool(ally.ChampionName.ToLower(), ally.ChampionName, true, 15, 1, 99, false));
             }
             Menu.Add(UltAllies);
+
+            var Misc = new Menu("Misc", "Misc");
+            {
+                Misc.Add(new MenuBool("supportmode", "Support Mode", true));
+            }
+            Menu.Add(Misc);
 
             var Draw = new Menu("Draw", "Drawings");
             {
@@ -74,6 +87,7 @@
 
             Render.OnPresent += Render_OnPresent;
             Game.OnUpdate += Game_OnUpdate;
+            Orbwalker.PreAttack += Orbwalker_OnPreAttack;
 
             Console.WriteLine("HeavenSeries - " + Player.ChampionName + " loaded.");
         }
@@ -99,8 +113,31 @@
                     Mixed();
                     break;
             }
+        }
 
-            
+        public static List<Obj_AI_Minion> GetEnemyLaneMinionsTargets()
+        {
+            return GetEnemyLaneMinionsTargetsInRange(float.MaxValue);
+        }
+        public static List<Obj_AI_Minion> GetEnemyLaneMinionsTargetsInRange(float range)
+        {
+            return GameObjects.EnemyMinions.Where(m => m.IsValidTarget(range) && m.UnitSkinName.Contains("Minion") && !m.UnitSkinName.Contains("Odin")).ToList();
+        }
+
+        public static void Orbwalker_OnPreAttack(object sender, PreAttackEventArgs args)
+        {
+            switch (IOrbwalker.Mode)
+            {
+                //Support mode logic, credit to @Exory
+                case OrbwalkingMode.Mixed:
+                case OrbwalkingMode.Lasthit:
+                case OrbwalkingMode.Laneclear:
+                    if (GetEnemyLaneMinionsTargets().Contains(args.Target) && Menu["Misc"]["supportmode"].Enabled)
+                    {
+                        args.Cancel = GameObjects.AllyHeroes.Any(a => !a.IsMe && a.Distance(Player) < 2500);
+                    }
+                    break;
+            }
         }
 
         private static void Render_OnPresent()
@@ -140,7 +177,7 @@
                 return;
             }
 
-            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && x.IsAlly && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
+            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && x.IsAlly && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling() && !x.IsMe))
             {
                 if (Obj.IsInRange(W.Range) && Obj != null && !Player.IsRecalling())
                 {
