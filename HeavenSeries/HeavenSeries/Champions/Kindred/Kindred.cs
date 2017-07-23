@@ -37,7 +37,7 @@
             var JungleClear = new Menu("jungleclear", "Jungle Clear");
             {
                 JungleClear.Add(new MenuBool("useq", "Use Q"));
-                JungleClear.Add(new MenuBool("useW", "Use W"));
+                JungleClear.Add(new MenuBool("usew", "Use W"));
                 JungleClear.Add(new MenuBool("usee", "Use E "));
                 JungleClear.Add(new MenuBool("user", "Use R"));
             }
@@ -46,7 +46,7 @@
             var ComboMenu = new Menu("combo", "Combo");
             {
                 ComboMenu.Add(new MenuBool("useq", "Use Q"));
-                ComboMenu.Add(new MenuBool("useW", "Use W"));
+                ComboMenu.Add(new MenuBool("usew", "Use W"));
                 ComboMenu.Add(new MenuBool("usee", "Use E "));
                 ComboMenu.Add(new MenuBool("user", "Use R"));
             }
@@ -154,7 +154,10 @@
             {
                 //TODO GRAB CDR of Q. If Q = 4, RECAST W. Add to below with ||
                 if (Q.Ready || target.HealthPercent() < 15)
+                {
                     W.Cast();
+                }
+                    
             }
 
             if (E.Ready && target.IsValidTarget(E.Range))
