@@ -155,12 +155,13 @@
                 //TODO GRAB CDR of Q. If Q = 4, RECAST W. Add to below with ||
                 if (Q.Ready || target.HealthPercent() < 15)
                 {
+                    if (Menu["combo"]["usew"].Enabled)
                     W.Cast();
                 }
                     
             }
 
-            if (E.Ready && target.IsValidTarget(E.Range))
+            if (E.Ready && target.IsValidTarget(E.Range) && Menu["combo"]["usee"].Enabled)
                 E.Cast(target);
 
             var dashPosition = Player.Position.Extend(Game.CursorPos, 320);
@@ -188,7 +189,7 @@
                 if (target.Distance(Obj) > 550)
                     return;
 
-                if (Menu["combo"]["user"].Enabled && Player.Distance(Obj) < R.Range)
+                if (Menu["combo"]["user"].Enabled && Player.Distance(Obj) < R.Range && Menu["combo"]["user"].Enabled)
                     R.Cast();
             }
         }
