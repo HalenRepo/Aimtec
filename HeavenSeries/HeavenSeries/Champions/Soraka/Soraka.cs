@@ -40,7 +40,7 @@
             Menu.Add(ComboMenu);
             var HealAllies = new Menu("healallies", "Auto Heal (W)");
             {
-                HealAllies.Add(new MenuBool("autow", "Auto W?", true));
+                HealAllies.Add(new MenuBool("autow", "Auto W", true));
                 HealAllies.Add(new MenuSlider("autowhealth", "Keep Soraka Health above x% ", 10, 1, 99, false));
                 HealAllies.Add(new MenuSeperator("sep1", "Minimum HP%: "));
                 foreach (Obj_AI_Hero ally in GameObjects.AllyHeroes)
@@ -50,12 +50,20 @@
 
             var UltAllies = new Menu("ultallies", "Auto R");
             {
-                UltAllies.Add(new MenuBool("autor", "Auto R?", true));
+                UltAllies.Add(new MenuBool("autor", "Auto R", true));
                 UltAllies.Add(new MenuSeperator("sep1", "Minimum HP%: "));
                 foreach (Obj_AI_Hero ally in GameObjects.AllyHeroes)
                     UltAllies.Add(new MenuSliderBool(ally.ChampionName.ToLower(), ally.ChampionName, true, 15, 1, 99, false));
             }
             Menu.Add(UltAllies);
+
+            var Draw = new Menu("Draw", "Drawings");
+            {
+                Draw.Add(new MenuBool("drawQ", "Draw Q", false));
+                Draw.Add(new MenuBool("drawW", "Draw W", true));
+                Draw.Add(new MenuBool("drawE", "Draw E", false));
+            }
+            Menu.Add(Draw);
 
             Menu.Attach();
 
@@ -98,6 +106,14 @@
         private static void Render_OnPresent()
         {
             //Drawings
+            if (Menu["Draw"]["drawQ"].Enabled)
+                Render.Circle(Player.Position, Q.Range, 30, Color.White);
+
+            if (Menu["Draw"]["drawW"].Enabled)
+                Render.Circle(Player.Position, W.Range, 30, Color.White);
+
+            if (Menu["Draw"]["drawE"].Enabled)
+                Render.Circle(Player.Position, E.Range, 30, Color.White);
         }
 
         private static void AutoR()
