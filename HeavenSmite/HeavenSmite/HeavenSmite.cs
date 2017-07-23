@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿
+using System.Linq;
 
 using Aimtec;
 using Spell = Aimtec.SDK.Spell;
@@ -7,6 +8,8 @@ using Aimtec.SDK.Menu;
 using Aimtec.SDK.Menu.Components;
 using System.Drawing;
 using Aimtec.SDK.Util;
+using Aimtec.SDK.Util.Cache;
+using System;
 
 namespace HeavenSmiteReborn
 {
@@ -24,8 +27,19 @@ namespace HeavenSmiteReborn
             }
         }
 
+        private static int SmiteDamagesChamp
+        {
+            get
+            {
+                int[] Dmg = new int[] { 28, 36, 44, 52, 60, 68, 76, 84, 92, 100, 108, 116, 124, 132, 140, 148, 156, 166 };
+
+                return Dmg[Player.Level - 1];
+            }
+        }
+
         private static Spell Smite;
         private static string[] pMobs = new string[] { "SRU_Baron", "SRU_Blue", "SRU_Red", "SRU_RiftHerald" };
+        private static string[] small = new string[] { "SRU_Murkwolf", "SRU_Razorbeak", "SRU_Gromp", "SRU_Krug", "Sru_Crab" };
 
 
         public HeavenSmite()
@@ -60,6 +74,15 @@ namespace HeavenSmiteReborn
                 Small.Add(new MenuBool("Sru_Crab", "Crab?"));
             }
             Menu.Add(Small);
+
+            var Champion = new Menu("Champion", "Champions");
+            {
+                Champion.Add(new MenuBool("ChampionToggle", "Smite Champions?", false));
+                foreach (Obj_AI_Hero enemies in GameObjects.EnemyHeroes)
+                    Champion.Add(new MenuBool("smiteKS" + enemies.ChampionName.ToLower(), enemies.ChampionName));
+            }
+            Menu.Add(Champion);
+
             var DrawMenu = new Menu("Draw", "Drawings");
             {
                 DrawMenu.Add(new MenuBool("DrawSmiteRange", "Smite Range?", false));
@@ -67,8 +90,6 @@ namespace HeavenSmiteReborn
             }
             Menu.Add(DrawMenu);
             Menu.Attach();
-
-
 
             Game.OnUpdate += delegate
             {
@@ -87,13 +108,20 @@ namespace HeavenSmiteReborn
                             Render.Text(coord.X, coord.Y, Menu["Key"].Enabled ? Color.LightGreen : Color.Red, Menu["Key"].Enabled ? "SMITE: ON" : "SMITE: OFF");
                     }
                 }
-                    
-                
-                    
 
                 if (!Menu["Key"].Enabled)
                     return;
-                    
+
+                if (Menu["Champion"]["ChampionToggle"].Enabled)
+                {
+                    foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamagesChamp >= x.Health && x.IsEnemy))
+                    {
+                        if (Menu["Champion"]["smiteKS" + Obj.ChampionName.ToLower()].Enabled)
+                        {
+                            Smite.Cast(Obj);
+                        }
+                    }
+                }
 
                 foreach (var Obj in ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamages >= x.Health))
                 {
@@ -101,15 +129,15 @@ namespace HeavenSmiteReborn
                     {
                         if (Menu["Dragons"][Obj.UnitSkinName].Enabled)
                             Smite.Cast(Obj);
-                    }
+                    } else
 
                     if (pMobs.Contains(Obj.UnitSkinName))
                     {
                         if (Menu["BigMobs"][Obj.UnitSkinName].Enabled)
                             Smite.Cast(Obj);
-                    }
+                    } else
 
-                    if (!pMobs.Contains(Obj.UnitSkinName) && !Obj.UnitSkinName.StartsWith("SRU_Dragon"))
+                    if (!pMobs.Contains(Obj.UnitSkinName) && !Obj.UnitSkinName.StartsWith("SRU_Dragon") && !Obj.UnitSkinName.StartsWith("SRU_Dragon") && small.Contains(Obj.UnitSkinName))
                     {
                         if (Menu["SmallMobs"][Obj.UnitSkinName].Enabled)
                             Smite.Cast(Obj);
