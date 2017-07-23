@@ -1,21 +1,21 @@
-﻿namespace HeavenSeries
+﻿using System;
+using System.Drawing;
+using System.Linq;
+
+using Aimtec;
+using Aimtec.SDK.Damage;
+using Aimtec.SDK.Extensions;
+using Aimtec.SDK.Menu;
+using Aimtec.SDK.Menu.Components;
+using Aimtec.SDK.Orbwalking;
+using Aimtec.SDK.TargetSelector;
+using Aimtec.SDK.Util.Cache;
+
+using Spell = Aimtec.SDK.Spell;
+using Aimtec.SDK.Prediction.Skillshots;
+
+namespace HeavenSeries
 {
-    using System;
-    using System.Drawing;
-    using System.Linq;
-
-    using Aimtec;
-    using Aimtec.SDK.Damage;
-    using Aimtec.SDK.Extensions;
-    using Aimtec.SDK.Menu;
-    using Aimtec.SDK.Menu.Components;
-    using Aimtec.SDK.Orbwalking;
-    using Aimtec.SDK.TargetSelector;
-    using Aimtec.SDK.Util.Cache;
-
-    using Spell = Aimtec.SDK.Spell;
-    using Aimtec.SDK.Prediction.Skillshots;
-
     internal class Blitzcrank
     {
         public static Menu Menu = new Menu("HeavenSeries", "HeavenSeries - " + Player.ChampionName, true);

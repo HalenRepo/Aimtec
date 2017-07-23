@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Champions\Blitzcrank\Blitzcrank.cs" />
+    <Compile Include="Champions\Kindred\Kindred.cs" />
     <Compile Include="Champions\Nidalee\Nidalee.cs" />
     <Compile Include="Champions\Soraka\Soraka.cs" />
     <Compile Include="Champions\Thresh\Thresh.cs" />

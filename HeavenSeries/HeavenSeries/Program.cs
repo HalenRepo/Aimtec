@@ -20,17 +20,21 @@
                     var Blitzcrank = new Blitzcrank();
                     break;
 
+                case "Kindred":
+                    var Kindred = new Kindred();
+                    break;
+
                 case "Nidalee":
                      var Nidalee = new Nidalee();
                     break;
 
-                /*case "Thresh":
-                     var Thresh = new Thresh();
-                    break;*/
-
                 case "Soraka":
                     var Soraka = new Soraka();
                     break;
+
+                /*case "Thresh":
+                 var Thresh = new Thresh();
+                break;*/
 
 
                 default: Console.WriteLine("Champion not supported.");

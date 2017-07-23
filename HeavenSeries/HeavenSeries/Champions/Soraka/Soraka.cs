@@ -1,22 +1,22 @@
-﻿namespace HeavenSeries
+﻿using System;
+using System.Drawing;
+using System.Linq;
+
+using Aimtec;
+using Aimtec.SDK.Damage;
+using Aimtec.SDK.Extensions;
+using Aimtec.SDK.Menu;
+using Aimtec.SDK.Menu.Components;
+using Aimtec.SDK.Orbwalking;
+using Aimtec.SDK.TargetSelector;
+using Aimtec.SDK.Util.Cache;
+
+using Spell = Aimtec.SDK.Spell;
+using Aimtec.SDK.Prediction.Skillshots;
+using System.Collections.Generic;
+
+namespace HeavenSeries
 {
-    using System;
-    using System.Drawing;
-    using System.Linq;
-
-    using Aimtec;
-    using Aimtec.SDK.Damage;
-    using Aimtec.SDK.Extensions;
-    using Aimtec.SDK.Menu;
-    using Aimtec.SDK.Menu.Components;
-    using Aimtec.SDK.Orbwalking;
-    using Aimtec.SDK.TargetSelector;
-    using Aimtec.SDK.Util.Cache;
-
-    using Spell = Aimtec.SDK.Spell;
-    using Aimtec.SDK.Prediction.Skillshots;
-    using System.Collections.Generic;
-
     internal class Soraka
     {
         public static Menu Menu = new Menu("HeavenSeries", "HeavenSeries - " + Player.ChampionName, true);
@@ -177,7 +177,7 @@
                 return;
             }
 
-            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && x.IsAlly && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling() && !x.IsMe))
+            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && !x.IsMe &&x.IsAlly && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
             {
                 if (Obj.IsInRange(W.Range) && Obj != null && !Player.IsRecalling())
                 {
