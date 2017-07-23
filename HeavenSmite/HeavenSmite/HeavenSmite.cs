@@ -5,6 +5,8 @@ using Spell = Aimtec.SDK.Spell;
 using Aimtec.SDK.Extensions;
 using Aimtec.SDK.Menu;
 using Aimtec.SDK.Menu.Components;
+using System.Drawing;
+using Aimtec.SDK.Util;
 
 namespace HeavenSmiteReborn
 {
@@ -24,6 +26,7 @@ namespace HeavenSmiteReborn
 
         private static Spell Smite;
         private static string[] pMobs = new string[] { "SRU_Baron", "SRU_Blue", "SRU_Red", "SRU_RiftHerald" };
+
 
         public HeavenSmite()
         {
@@ -57,15 +60,40 @@ namespace HeavenSmiteReborn
                 Small.Add(new MenuBool("Sru_Crab", "Crab?"));
             }
             Menu.Add(Small);
+            var DrawMenu = new Menu("Draw", "Drawings");
+            {
+                DrawMenu.Add(new MenuBool("DrawSmiteRange", "Smite Range?", false));
+                DrawMenu.Add(new MenuBool("AutoSmiteToggle", "AutoSmite State?"));
+            }
+            Menu.Add(DrawMenu);
             Menu.Attach();
+
+
 
             Game.OnUpdate += delegate
             {
                 if (Player.IsDead && !Smite.Ready)
                     return;
 
+                if (Menu["Draw"]["DrawSmiteRange"].Enabled)
+                    Render.Circle(Player.Position, Smite.Range, 30, Color.LightGreen);
+
+                if (Menu["Draw"]["AutoSmiteToggle"].Enabled)
+                {
+                    if (Render.WorldToScreen(Player.Position, out Vector2 coord))
+                    {
+                        coord.Y -= -30;
+                        if (coord.X > 0 && coord.Y > 0 && coord.X < Render.Width && coord.Y < Render.Height)
+                            Render.Text(coord.X, coord.Y, Menu["Key"].Enabled ? Color.LightGreen : Color.Red, Menu["Key"].Enabled ? "SMITE: ON" : "SMITE: OFF");
+                    }
+                }
+                    
+                
+                    
+
                 if (!Menu["Key"].Enabled)
                     return;
+                    
 
                 foreach (var Obj in ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamages >= x.Health))
                 {
