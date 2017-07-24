@@ -113,30 +113,11 @@ namespace HeavenSmiteReborn
                 if (!Menu["Key"].Enabled)
                     return;
 
-                if (Menu["Champion"]["ChampionToggle"].Enabled)
-                {
-
-                    //Preserve smite charge?
-                    if (Menu["Champion"]["smiteCharge"].Enabled)
-                    {
-                        if (Player.SpellBook.Spells.FirstOrDefault(spell => spell.Name.Contains("Smite")).Ammo <= 1)
-                            return;
-                        
-                    }
-
-                    foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamagesChamp >= x.Health && x.IsEnemy))
-                    {
-                        if (Menu["Champion"]["smiteKS" + Obj.ChampionName.ToLower()].Enabled)
-                        {
-                            Smite.Cast(Obj);
-                        }
-                    }
-                }
-
                 foreach (var Obj in ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamages >= x.Health))
                 {
                     if (Obj.UnitSkinName.StartsWith("SRU_Dragon"))
                     {
+                        
                         if (Menu["Dragons"][Obj.UnitSkinName].Enabled)
                             Smite.Cast(Obj);
                     } else
@@ -152,6 +133,29 @@ namespace HeavenSmiteReborn
                         if (Menu["SmallMobs"][Obj.UnitSkinName].Enabled)
                             Smite.Cast(Obj);
                     }
+                }
+
+                if (Menu["Champion"]["ChampionToggle"].Enabled)
+                {
+                    foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamagesChamp >= x.Health && x.IsEnemy))
+                    {
+                        
+                        if (Menu["Champion"]["smiteKS" + Obj.ChampionName.ToLower()].Enabled)
+                        {
+
+                            //Preserve smite charge?
+                            if (Menu["Champion"]["smiteCharge"].Enabled)
+                            {
+                                if (Player.SpellBook.Spells.FirstOrDefault(spell => spell.Name.Contains("Smite")).Ammo <= 1)
+                                    return;
+
+                            }
+
+                            Smite.Cast(Obj);
+                        }
+                        
+                    }
+
                 }
             };
         }
