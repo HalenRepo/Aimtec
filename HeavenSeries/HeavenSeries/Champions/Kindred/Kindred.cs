@@ -34,14 +34,6 @@
         {
             Orbwalker.Attach(Menu);
 
-            var JungleClear = new Menu("jungleclear", "Jungle Clear");
-            {
-                JungleClear.Add(new MenuBool("useq", "Use Q"));
-                JungleClear.Add(new MenuBool("usew", "Use W"));
-                JungleClear.Add(new MenuBool("usee", "Use E "));
-            }
-            Menu.Add(JungleClear);
-
             var ComboMenu = new Menu("combo", "Combo");
             {
                 ComboMenu.Add(new MenuBool("useq", "Use Q"));
@@ -50,6 +42,14 @@
                 ComboMenu.Add(new MenuBool("user", "Use R"));
             }
             Menu.Add(ComboMenu);
+
+            var JungleClear = new Menu("jungleclear", "Jungle Clear");
+            {
+                JungleClear.Add(new MenuBool("useq", "Use Q"));
+                JungleClear.Add(new MenuBool("usew", "Use W"));
+                JungleClear.Add(new MenuBool("usee", "Use E "));
+            }
+            Menu.Add(JungleClear);
 
             var UltMenu = new Menu("UltMenu", "R Settings");
             {

@@ -45,6 +45,14 @@ namespace HeavenSeries
                     ComboMenu.Add(new MenuBool("useqon" + enemies.ChampionName.ToLower(), enemies.ChampionName));
             }
             Menu.Add(ComboMenu);
+
+            var DrawMenu = new Menu("draw", "Drawings");
+            {
+                DrawMenu.Add(new MenuBool("drawQ", "Draw Q"));
+                DrawMenu.Add(new MenuBool("drawPrediction", "Draw Prediction"));
+            }
+            Menu.Add(DrawMenu);
+
             Menu.Attach();
 
             Q.SetSkillshot(0.25f, 70f, 1800f, true, SkillshotType.Line);
@@ -78,13 +86,8 @@ namespace HeavenSeries
         private static void Render_OnPresent()
         {
             //Basic Q range indicator
-            Render.Circle(Player.Position, Q.Range, 30, Color.White);
-
-            //Draw circle under Q target
-           /* if (Q.Ready)
-            {
-                Render.Circle(GetBestEnemyHeroTargetInRange(Q.Range).Position, 50, 30, Color.Blue);
-            }*/
+            if (Menu["draw"]["drawQ"].Enabled)
+                Render.Circle(Player.Position, Q.Range, 30, Color.White);
         }
 
 
@@ -99,9 +102,42 @@ namespace HeavenSeries
             var target = TargetSelector.GetTarget(Q.Range);
 
             //Q logic
-            if (useQ && Q.Ready && Menu["combo"]["useqon" + target.ChampionName.ToLower()].Enabled && target.IsValidTarget(Q.Range) && target != null)
+            if (target != null && useQ && Q.Ready && Menu["combo"]["useqon" + target.ChampionName.ToLower()].Enabled && target.IsValidTarget(Q.Range))
             {
                 var prediction = Q.GetPrediction(target);
+                //Draw prediction
+                if (Menu["draw"]["drawPrediction"].Enabled)
+                {
+                    Render.WorldToScreen(Player.Position, out Vector2 playerScreenPos);
+                    Color lineColour;
+                    switch (prediction.HitChance)
+                    {
+                        case HitChance.Collision:
+                            lineColour = Color.Red;
+                            break;
+
+                        case HitChance.Impossible:
+                            lineColour = Color.Orange;
+                            break;
+
+                        case HitChance.Medium:
+                            lineColour = Color.Orange;
+                            break;
+
+                        case HitChance.High:
+                            lineColour = Color.LightGreen;
+                            break;
+
+                        default:
+                            lineColour = Color.Red;
+                            return;
+                    }
+                    
+                    Render.WorldToScreen(prediction.UnitPosition, out Vector2 predictionSreenPos);
+                    Render.Line(playerScreenPos, predictionSreenPos, lineColour);
+
+                }
+                //If prediction high chance -> Q
                 if (prediction.HitChance >= HitChance.High)
                 {
                     Q.Cast(prediction.UnitPosition);
