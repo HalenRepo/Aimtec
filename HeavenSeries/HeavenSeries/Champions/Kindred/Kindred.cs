@@ -25,7 +25,7 @@
 
         public static Spell Q = new Spell(SpellSlot.Q, 340);
         public static Spell W = new Spell(SpellSlot.W, 500);
-        public static Spell E = new Spell(SpellSlot.E, 500);
+        public static Spell E = new Spell(SpellSlot.E, 500); //E increases in range now.
         public static Spell R = new Spell(SpellSlot.R, 500);
 
         public static IOrbwalker IOrbwalker = Orbwalker.Implementation;

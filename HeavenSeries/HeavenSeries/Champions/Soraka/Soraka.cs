@@ -23,8 +23,8 @@ namespace HeavenSeries
         public static Orbwalker Orbwalker = new Orbwalker();
         public static Obj_AI_Hero Player => ObjectManager.GetLocalPlayer();
 
-        public static Spell Q = new Spell(SpellSlot.Q, 950);
-        public static Spell W = new Spell(SpellSlot.W, 450);
+        public static Spell Q = new Spell(SpellSlot.Q, 800);
+        public static Spell W = new Spell(SpellSlot.W, 550);
         public static Spell E = new Spell(SpellSlot.E, 925);
         public static Spell R = new Spell(SpellSlot.R);
 
@@ -158,7 +158,7 @@ namespace HeavenSeries
             if (!R.Ready)
                 return;
 
-            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsAlly && x.HealthPercent() < Menu["ultallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
+            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsAlly && !x.IsDead && x.HealthPercent() < Menu["ultallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
             {
                 R.Cast();
             }
@@ -177,7 +177,7 @@ namespace HeavenSeries
                 return;
             }
 
-            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && !x.IsMe &&x.IsAlly && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
+            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && !x.IsMe &&x.IsAlly && !x.IsDead && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
             {
                 if (Obj.IsInRange(W.Range) && Obj != null && !Player.IsRecalling())
                 {
