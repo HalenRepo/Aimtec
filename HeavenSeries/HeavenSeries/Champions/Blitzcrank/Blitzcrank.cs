@@ -146,7 +146,7 @@ namespace HeavenSeries
             }
 
             //E logic - Avoid using E on already knocked up target
-            if (useE && E.Ready && target.IsValidTarget(150) && !target.HasBuffOfType(BuffType.Knockup))
+            if (useE && E.Ready && target.IsValidTarget(E.Range) && !target.HasBuffOfType(BuffType.Knockup))
             {
                 E.Cast();
             }
