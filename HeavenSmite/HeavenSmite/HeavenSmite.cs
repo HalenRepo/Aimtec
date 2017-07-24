@@ -50,34 +50,35 @@ namespace HeavenSmiteReborn
 
             var Dragons = new Menu("Dragons", "Dragons");
             {
-                Dragons.Add(new MenuBool("SRU_Dragon_Air", "Air Dragon?"));
-                Dragons.Add(new MenuBool("SRU_Dragon_Fire", "Fire Dragon?"));
-                Dragons.Add(new MenuBool("SRU_Dragon_Earth", "Earth Dragon?"));
-                Dragons.Add(new MenuBool("SRU_Dragon_Water", "Water Dragon?"));
-                Dragons.Add(new MenuBool("SRU_Dragon_Elder", "Elder Dragon?"));
+                Dragons.Add(new MenuBool("SRU_Dragon_Air", "Air Dragon"));
+                Dragons.Add(new MenuBool("SRU_Dragon_Fire", "Fire Dragon"));
+                Dragons.Add(new MenuBool("SRU_Dragon_Earth", "Earth Dragon"));
+                Dragons.Add(new MenuBool("SRU_Dragon_Water", "Water Dragon"));
+                Dragons.Add(new MenuBool("SRU_Dragon_Elder", "Elder Dragon"));
             };
             Menu.Add(Dragons);
             var Big = new Menu("BigMobs", "Big Mobs");
             {
-                Big.Add(new MenuBool("SRU_Baron", "Baron?"));
-                Big.Add(new MenuBool("SRU_Blue", "Blue?"));
-                Big.Add(new MenuBool("SRU_Red", "Red?"));
-                Big.Add(new MenuBool("SRU_RiftHerald", "Rift Herald?"));
+                Big.Add(new MenuBool("SRU_Baron", "Baron"));
+                Big.Add(new MenuBool("SRU_Blue", "Blue"));
+                Big.Add(new MenuBool("SRU_Red", "Red"));
+                Big.Add(new MenuBool("SRU_RiftHerald", "Rift Herald"));
             }
             Menu.Add(Big);
             var Small = new Menu("SmallMobs", "Small Mobs");
             {
-                Small.Add(new MenuBool("SRU_Gromp", "Gromp?"));
-                Small.Add(new MenuBool("SRU_Murkwolf", "Wolves?"));
-                Small.Add(new MenuBool("SRU_Krug", "Krug?"));
-                Small.Add(new MenuBool("SRU_Razorbeak", "Razor?"));
-                Small.Add(new MenuBool("Sru_Crab", "Crab?"));
+                Small.Add(new MenuBool("SRU_Gromp", "Gromp"));
+                Small.Add(new MenuBool("SRU_Murkwolf", "Wolves"));
+                Small.Add(new MenuBool("SRU_Krug", "Krug"));
+                Small.Add(new MenuBool("SRU_Razorbeak", "Razor"));
+                Small.Add(new MenuBool("Sru_Crab", "Crab"));
             }
             Menu.Add(Small);
 
             var Champion = new Menu("Champion", "Champions");
             {
-                Champion.Add(new MenuBool("ChampionToggle", "Smite Champions?", false));
+                Champion.Add(new MenuBool("ChampionToggle", "Smite Champions", false));
+                Champion.Add(new MenuBool("smiteCharge", "Always Hold 1 Smite Charge"));
                 foreach (Obj_AI_Hero enemies in GameObjects.EnemyHeroes)
                     Champion.Add(new MenuBool("smiteKS" + enemies.ChampionName.ToLower(), enemies.ChampionName));
             }
@@ -85,8 +86,8 @@ namespace HeavenSmiteReborn
 
             var DrawMenu = new Menu("Draw", "Drawings");
             {
-                DrawMenu.Add(new MenuBool("DrawSmiteRange", "Smite Range?", false));
-                DrawMenu.Add(new MenuBool("AutoSmiteToggle", "AutoSmite State?"));
+                DrawMenu.Add(new MenuBool("DrawSmiteRange", "Smite Range", false));
+                DrawMenu.Add(new MenuBool("AutoSmiteToggle", "AutoSmite State"));
             }
             Menu.Add(DrawMenu);
             Menu.Attach();
@@ -114,6 +115,15 @@ namespace HeavenSmiteReborn
 
                 if (Menu["Champion"]["ChampionToggle"].Enabled)
                 {
+
+                    //Preserve smite charge?
+                    if (Menu["Champion"]["smiteCharge"].Enabled)
+                    {
+                        if (Player.SpellBook.Spells.FirstOrDefault(spell => spell.Name.Contains("Smite")).Ammo <= 1)
+                            return;
+                        
+                    }
+
                     foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamagesChamp >= x.Health && x.IsEnemy))
                     {
                         if (Menu["Champion"]["smiteKS" + Obj.ChampionName.ToLower()].Enabled)
