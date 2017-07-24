@@ -25,7 +25,7 @@
 
         public static Spell Q = new Spell(SpellSlot.Q, 340);
         public static Spell W = new Spell(SpellSlot.W, 500);
-        public static Spell E = new Spell(SpellSlot.E, 500); //E increases in range now.
+        public static Spell E = new Spell(SpellSlot.E, 500); //E increases in range with passive now. 
         public static Spell R = new Spell(SpellSlot.R, 500);
 
         public static IOrbwalker IOrbwalker = Orbwalker.Implementation;
@@ -39,7 +39,6 @@
                 JungleClear.Add(new MenuBool("useq", "Use Q"));
                 JungleClear.Add(new MenuBool("usew", "Use W"));
                 JungleClear.Add(new MenuBool("usee", "Use E "));
-                JungleClear.Add(new MenuBool("user", "Use R"));
             }
             Menu.Add(JungleClear);
 
@@ -54,8 +53,9 @@
 
             var UltMenu = new Menu("UltMenu", "R Settings");
             {
-                UltMenu.Add(new MenuSliderBool("allyhealth", "Ally Health % to use R", true, 15, 1, 99, false));
-                UltMenu.Add(new MenuSliderBool("enemies", "Minimum Enemies near Ally to use R", true, 2, 1, 5, false));
+                UltMenu.Add(new MenuBool("autor", "Auto R"));
+                UltMenu.Add(new MenuSlider("allyhealth", "Ally Health % to use R", 15, 1, 99, false));
+                UltMenu.Add(new MenuSlider("enemies", "Minimum Enemies near Ally to use R", 2, 1, 5, false));
             }
             Menu.Add(UltMenu);
 
@@ -97,7 +97,8 @@
                     break;
             }
 
-
+            if (Menu["UltMenu"]["autor"].Enabled && R.Ready)
+                AutoR();
         }
 
         private static void Render_OnPresent()
@@ -140,6 +141,26 @@
                     return;
 
                 Orbwalker.ForceTarget(target);
+            }
+        }
+
+        private static void AutoR()
+        {
+            var target = TargetSelector.GetTarget(W.Range);
+            if (!R.Ready && target != null)
+                return;
+
+            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValid && x.IsAlly && x.IsVisible && x.Distance(Player) < R.Range &&
+            x.CountEnemyHeroesInRange(R.Range) <= Menu["UltMenu"]["enemies"].Value && x.HealthPercent() < Menu["UltMenu"]["allyhealth"].Value))
+            {
+                if (!target.IsFacing(Obj))
+                    return;
+
+                if (target.Distance(Obj) > 550)
+                    return;
+
+                if (Menu["combo"]["user"].Enabled && Player.Distance(Obj) < R.Range && Menu["combo"]["user"].Enabled)
+                    R.Cast();
             }
         }
 
