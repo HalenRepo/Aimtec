@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2A1CAD0C-50BD-4236-9D99-E14F504E08F6}</ProjectGuid>
+    <ProjectGuid>{FD7A9FA4-AC48-4302-B1B9-C86803AD4F0A}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>HeavenSeries</RootNamespace>
-    <AssemblyName>HeavenSeries</AssemblyName>
+    <RootNamespace>HeavenSmite</RootNamespace>
+    <AssemblyName>HeavenSmite</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -50,12 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Champions\Blitzcrank\Blitzcrank.cs" />
-    <Compile Include="Champions\Elise\Elise.cs" />
-    <Compile Include="Champions\Kindred\Kindred.cs" />
-    <Compile Include="Champions\Nidalee\Nidalee.cs" />
-    <Compile Include="Champions\Soraka\Soraka.cs" />
-    <Compile Include="Champions\Thresh\Thresh.cs" />
+    <Compile Include="HeavenSmite.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
