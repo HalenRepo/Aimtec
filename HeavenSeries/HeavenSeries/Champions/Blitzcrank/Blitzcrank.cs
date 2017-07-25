@@ -34,6 +34,7 @@ namespace HeavenSeries
             var ComboMenu = new Menu("combo", "Combo");
             {
                 ComboMenu.Add(new MenuBool("useq", "Use Q"));
+                ComboMenu.Add(new MenuSlider("predictionSlider", "Prediction (4 is the highest): ", 4, 1, 5));
                 ComboMenu.Add(new MenuBool("usee", "Use E "));
                 ComboMenu.Add(new MenuBool("user", "Use R"));
                 ComboMenu.Add(new MenuSliderBool("rAOE", "Minimum enemies for R", true, 1, 1, GameObjects.EnemyHeroes.Count()));
@@ -138,7 +139,28 @@ namespace HeavenSeries
 
                 }
                 //If prediction high chance -> Q
-                if (prediction.HitChance >= HitChance.High)
+
+                HitChance slider = HitChance.High;
+                switch (Menu["combo"]["predictionSlider"].Value)
+                {
+                    case 1:
+                        slider = HitChance.Impossible;
+                        break;
+
+                    case 2:
+                        slider = HitChance.Low;
+                        break;
+
+                    case 3:
+                        slider = HitChance.Medium;
+                        break;
+
+                    case 4:
+                        slider = HitChance.High;
+                        break;
+                }
+                //if (prediction.HitChance >= HitChance.High)
+                if (prediction.HitChance >= slider)
                 {
                     Q.Cast(prediction.UnitPosition);
                 }

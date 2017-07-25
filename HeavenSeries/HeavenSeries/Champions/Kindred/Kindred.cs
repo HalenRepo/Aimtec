@@ -80,6 +80,7 @@
 
         private void Game_OnUpdate()
         {
+            Console.WriteLine();
             if (Player.IsDead || MenuGUI.IsChatOpen())
             {
                 return;
