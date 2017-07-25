@@ -41,7 +41,6 @@ namespace HeavenSmiteReborn
         private static string[] pMobs = new string[] { "SRU_Baron", "SRU_Blue", "SRU_Red", "SRU_RiftHerald" };
         private static string[] small = new string[] { "SRU_Murkwolf", "SRU_Razorbeak", "SRU_Gromp", "SRU_Krug", "Sru_Crab" };
 
-
         public HeavenSmite()
         {
             Smite = new Spell(Player.SpellBook.Spells.FirstOrDefault(spell => spell.Name.Contains("Smite")).Slot, 500);
@@ -128,7 +127,7 @@ namespace HeavenSmiteReborn
                             Smite.Cast(Obj);
                     } else
 
-                    if (!pMobs.Contains(Obj.UnitSkinName) && !Obj.UnitSkinName.StartsWith("SRU_Dragon") && !Obj.UnitSkinName.StartsWith("SRU_Dragon") && small.Contains(Obj.UnitSkinName))
+                    if (small.Contains(Obj.UnitSkinName))
                     {
                         if (Menu["SmallMobs"][Obj.UnitSkinName].Enabled)
                             Smite.Cast(Obj);
@@ -142,13 +141,11 @@ namespace HeavenSmiteReborn
                         
                         if (Menu["Champion"]["smiteKS" + Obj.ChampionName.ToLower()].Enabled)
                         {
-
                             //Preserve smite charge?
                             if (Menu["Champion"]["smiteCharge"].Enabled)
                             {
                                 if (Player.SpellBook.Spells.FirstOrDefault(spell => spell.Name.Contains("Smite")).Ammo <= 1)
                                     return;
-
                             }
 
                             Smite.Cast(Obj);
