@@ -112,18 +112,19 @@ namespace HeavenSmiteReborn
                 if (!Menu["Key"].Enabled)
                     return;
 
-                foreach (var Obj in ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamages >= x.Health))
+                foreach (var Obj in ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamages >= x.Health && !x.IsDead && x.IsValidSpellTarget()))
                 {
+
+                    if (pMobs.Contains(Obj.UnitSkinName) || Obj.UnitSkinName.Contains("Baron"))
+                    {
+                        if (Menu["BigMobs"][Obj.UnitSkinName].Enabled)
+                            Smite.Cast(Obj);
+                    }
+
                     if (Obj.UnitSkinName.Contains("Dragon"))
                     {
                         
                         if (Menu["Dragons"][Obj.UnitSkinName].Enabled)
-                            Smite.Cast(Obj);
-                    }
-
-                    if (pMobs.Contains(Obj.UnitSkinName))
-                    {
-                        if (Menu["BigMobs"][Obj.UnitSkinName].Enabled)
                             Smite.Cast(Obj);
                     }
 
