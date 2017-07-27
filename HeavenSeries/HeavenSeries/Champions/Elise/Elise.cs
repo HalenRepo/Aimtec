@@ -28,7 +28,7 @@ namespace HeavenSeries
         public static Spell E = new Spell(SpellSlot.E, 1100);
 
         public static Spell QS = new Spell(SpellSlot.Q, 475);
-        public static Spell WS = new Spell(SpellSlot.W, 0);
+        public static Spell WS = new Spell(SpellSlot.W);
         public static Spell ES = new Spell(SpellSlot.E, 750);
 
         public static Spell R = new Spell(SpellSlot.R);
@@ -69,19 +69,17 @@ namespace HeavenSeries
 
             var junglemenu = new Menu("jungle", "Jungle Clear")
             {
-
+                new MenuBool("stayspider", "Stay as Spider when Mana below x%"),
                 new Menu("humancombo", "Human")
                 {
                     new MenuBool("humanq", "Use Q"),
                     new MenuBool("humanw", "Use W"),
-                    new MenuBool("humane", "Use E")
                 },
 
                 new Menu("spidercombo", "Spider")
                 {
                     new MenuBool("spiderq", "Use Q"),
                     new MenuBool("spiderw", "Use W"),
-                    new MenuBool("spidere", "Use E"),
                 },
                 new MenuBool("autor", "Auto R")
             };
@@ -91,8 +89,9 @@ namespace HeavenSeries
             {
                 new MenuBool("drawq", "Draw Q", false),
                 new MenuBool("draww", "Draw W", false),
-                new MenuBool("drawe", "Draw E")
-            };
+                new MenuBool("drawe", "Draw E"),
+                new MenuBool("drawPrediction", "Draw E Prediction")
+        };
             Menu.Add(drawmenu);
 
 
@@ -173,7 +172,6 @@ namespace HeavenSeries
                 HumanForm = false;
                 SpiderForm = true;
             }
-            //Console.WriteLine("Human: " + HumanForm + " | Spider: " + SpiderForm);
         }
 
         private static void Render_OnPresent()
@@ -193,24 +191,20 @@ namespace HeavenSeries
 
         public static void Orbwalker_OnPostAttack(Object sender, PostAttackEventArgs args)
         {
+            //For post attack. If none, return.
+            if (IOrbwalker.Mode == OrbwalkingMode.None)
+                return;
 
+            //Spider W auto attack reset
+            if (!WS.Ready)
+                return;
+
+            DelayAction.Queue(100 + Game.Ping, Orbwalker.ResetAutoAttackTimer);
         }
 
         public static void Orbwalker_OnPreAttack(object sender, PreAttackEventArgs args)
         {
-            //Focus kindredcharge target
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget() && x.Distance(Player) < Player.AttackRange && x.IsVisible))
-            {
-                if (!target.HasBuff("kindredcharge") || target == null)
-                    return;
-
-                Orbwalker.ForceTarget(target);
-            }
-        }
-
-        private static void AutoR()
-        {
-           
+            
         }
 
         private void Combo()
@@ -226,6 +220,41 @@ namespace HeavenSeries
                 if (target.IsInRange(E.Range)) //DO MENU CHECKS HERE
                 {
                     var prediction = E.GetPrediction(target);
+                    //Draw prediction
+                    if (Menu["DrawMenu"]["drawPrediction"].Enabled)
+                    {
+                        Render.WorldToScreen(Player.Position, out Vector2 playerScreenPos);
+                        Color lineColour;
+                        switch (prediction.HitChance)
+                        {
+                            case HitChance.Collision:
+                                lineColour = Color.Red;
+                                break;
+
+                            case HitChance.Impossible:
+                                lineColour = Color.Orange;
+                                break;
+
+                            case HitChance.Medium:
+                                lineColour = Color.Orange;
+                                break;
+
+                            case HitChance.High:
+                                lineColour = Color.LightGreen;
+                                break;
+
+                            default:
+                                lineColour = Color.Red;
+                                return;
+                        }
+
+                        Render.WorldToScreen(prediction.UnitPosition, out Vector2 predictionSreenPos);
+                        Render.Line(playerScreenPos, predictionSreenPos, lineColour);
+
+                    }
+
+
+
                     if (prediction.HitChance >= HitChance.High)
                         E.Cast(prediction.UnitPosition);
                 }
@@ -249,7 +278,7 @@ namespace HeavenSeries
                 {
                     R.Cast();
                 }
-                    R.Cast();
+                    //R.Cast();
             }
 
             if (SpiderForm)
@@ -257,7 +286,7 @@ namespace HeavenSeries
                 if (target.IsInRange(QS.Range)) //DO MENU CHECKS HERE
                     QS.Cast(target);
 
-                if (target.IsInRange(140))
+                if (target.IsInRange(Player.AttackRange))
                     WS.Cast(target);
 
                 if (target.IsInRange(ES.Range) && Player.Distance(target) > QS.Range)
@@ -293,20 +322,42 @@ namespace HeavenSeries
                     if (W.Ready && minion.IsValidTarget() && minion.IsInRange(W.Range))
                         W.Cast();
 
-                    if (!Q.Ready && !W.Ready)
+                    if (R.Ready && !Q.Ready && !W.Ready)
                         R.Cast();
                 }
 
                 if (!HumanForm)
                 {
                     if (QS.Ready && minion.IsValidTarget() && minion.IsInRange(QS.Range))
+                    {
                         QS.Cast(minion);
+                    }
+                        
 
-                    if (WS.Ready && minion.IsValidTarget() && minion.IsInRange(WS.Range))
-                        WS.Cast(minion);
+                    if (WS.Ready && minion.IsValidTarget() && minion.IsInRange(Player.AttackRange))
+                    {
+                        Console.WriteLine(Game.ClockTime + " casting spider w");
+                        WS.Cast();
+                    }
+                    if (Player.HasBuffOfType(BuffType.CombatEnchancer)) //maybe that checks for attack speed steroid?
+                        {
+                        Console.WriteLine("detected");
+                        }
 
-                    if (ES.Ready && minion.IsValidTarget() && minion.IsInRange(ES.Range))
-                        ES.Cast(minion);
+                    if (R.Ready && !QS.Ready && !WS.Ready)
+                    {
+                        //Console.WriteLine(Game.ClockTime + " | change!");
+                        if (!WS.Ready && target.IsInRange(Player.AttackRange))
+                        {
+                            //maybe 3000 for 3 seconds from W buff
+                            DelayAction.Queue(2500, () => R.Cast());
+                        }
+                        
+
+                        R.Cast();
+
+                    }
+                        
                 }
             }
         }

@@ -53,7 +53,9 @@
     <Compile Include="Champions\Blitzcrank\Blitzcrank.cs" />
     <Compile Include="Champions\Elise\Elise.cs" />
     <Compile Include="Champions\Kindred\Kindred.cs" />
+    <Compile Include="Champions\Nasus\Nasus.cs" />
     <Compile Include="Champions\Nidalee\Nidalee.cs" />
+    <Compile Include="Champions\RekSai\RekSai.cs" />
     <Compile Include="Champions\Soraka\Soraka.cs" />
     <Compile Include="Champions\Thresh\Thresh.cs" />
     <Compile Include="Program.cs" />
