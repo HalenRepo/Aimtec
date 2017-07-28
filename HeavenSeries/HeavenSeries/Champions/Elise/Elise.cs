@@ -44,7 +44,7 @@ namespace HeavenSeries
             E.SetSkillshot(0.25f, 55f, 1600, true, SkillshotType.Line);
 
             Menus();
-            MenuClass.combomenu.Add(new MenuSeperator("sepElise", "Use Human E (Caccoon) on: "));
+            MenuClass.combomenu.Add(new MenuSeperator("sepElise", "Use Human E (Cocoon) on: "));
             foreach (Obj_AI_Hero enemies in GameObjects.EnemyHeroes)
                 MenuClass.combomenu.Add(new MenuBool("useeon" + enemies.ChampionName.ToLower(), enemies.ChampionName));
 
