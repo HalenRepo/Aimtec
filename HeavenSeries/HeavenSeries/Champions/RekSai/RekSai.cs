@@ -193,6 +193,11 @@ namespace HeavenSeries
                 if (target == null)
                     return;
 
+                if (target.IsInRange(Player.AttackRange))
+                {
+                    return;
+                }
+
                 if (Eb.Ready && target.IsValidTarget(Eb.Range + Wb.Range))
                 {
                     var prediction = Eb.GetPrediction(target);
@@ -224,26 +229,25 @@ namespace HeavenSeries
 
                 if (E.Ready && target.IsValidTarget(E.Range))
                 {
-                    /*if (reksaifury && !Player.HasBuff("RekSaiQ")) //?
+                    if (reksaifury && !Player.HasBuff("RekSaiQ")) //?
                     {
                         E.Cast(target);
-                    }*/
+                    }
                     E.Cast(target);
                 }
 
                 //CHECK MENU FOR AUTO W USE IN COMBO
-                if (Menu["combo"]["autow"].Enabled)
-                {
+            
                     target = TargetSelector.GetTarget(Qb.Range);
 
                     if (target == null)
                         return;
 
-                    if (!Q.Ready && target.IsValidTarget(E.Range) && target.IsValidTarget(Qb.Range)) // && !Player.HasBuff("RekSaiQ")?
+                    if (!Q.Ready && target.IsValidTarget(E.Range) && target.IsValidTarget(Qb.Range) && !target.HasBuff("RekSaiKnockupImmune")) // && !Player.HasBuff("RekSaiQ")?
                     {
                         W.CastOnUnit(Player);
                     }
-                }
+                
                     
 
             }

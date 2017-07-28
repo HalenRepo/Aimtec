@@ -28,6 +28,10 @@
                     var Kindred = new Kindred();
                     break;
 
+                case "Nami":
+                    var Nami = new Nami();
+                    break;
+
                 case "Nasus":
                     var Nasus = new Nasus();
                     break;
@@ -36,7 +40,7 @@
                      var Nidalee = new Nidalee();
                     break;
 
-               /* case "RekSai":
+                /*case "RekSai":
                     var RekSai = new RekSai();
                     break;*/
 

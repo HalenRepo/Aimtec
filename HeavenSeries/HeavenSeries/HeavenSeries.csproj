@@ -55,6 +55,9 @@
     <Compile Include="Champions\Elise\MenuClass.cs" />
     <Compile Include="Champions\Elise\Menus.cs" />
     <Compile Include="Champions\Kindred\Kindred.cs" />
+    <Compile Include="Champions\Nami\MenuClass.cs" />
+    <Compile Include="Champions\Nami\Menus.cs" />
+    <Compile Include="Champions\Nami\Nami.cs" />
     <Compile Include="Champions\Nasus\Nasus.cs" />
     <Compile Include="Champions\Nidalee\Nidalee.cs" />
     <Compile Include="Champions\RekSai\RekSai.cs" />

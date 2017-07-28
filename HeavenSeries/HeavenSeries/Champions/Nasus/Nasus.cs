@@ -60,7 +60,7 @@ namespace HeavenSeries
                     new MenuBool("useq", "Use Q"),
                     new MenuBool("manar", "Keep Mana for R"),
                     new MenuSliderBool("rAOE", "Minimum enemies for R", true, 2, 1, GameObjects.EnemyHeroes.Count()),
-                    new MenuSlider("minmanar", "Minimum Mana % for R: ", 25, 1, 100)
+                    //new MenuSlider("minmanar", "Minimum Mana % for R: ", 25, 1, 100)
                 },
             };
             Menu.Add(combomenu);
@@ -126,7 +126,10 @@ namespace HeavenSeries
                     break;
 
                 case OrbwalkingMode.Laneclear:
-                    LaneClear();
+                    /*if (Q.Ready)
+                    {
+                        useQ();
+                    }*/
                     break;
             }
         }
@@ -161,20 +164,14 @@ namespace HeavenSeries
             if (minions == null)
                 return;
 
-            var lastHitMinion = minions.FirstOrDefault(x => Player.GetSpellDamage(x, SpellSlot.Q) + Player.TotalAttackDamage >= x.Health && x.Health > 5 && x.IsMinion); //&& Player.SpellBook.GetSpell(SpellSlot.Q).SpellData.???) <--- found out stack count to determine q damage?
+            var lastHitMinion = minions.FirstOrDefault(x => Player.GetSpellDamage(x, SpellSlot.Q) + Player.GetAutoAttackDamage(x) >= x.Health && x.Health > 5 && x.IsMinion); //&& Player.SpellBook.GetSpell(SpellSlot.Q).SpellData.???) <--- found out stack count to determine q damage?
            
             if (lastHitMinion != null)
             {
                 Q.Cast();
-                IOrbwalker.Attack(lastHitMinion);
+                IOrbwalker.ForceTarget(lastHitMinion);
             }
                 
-        }
-
-        private void LaneClear()
-        {
-            if (Q.Ready)
-                useQ();
         }
 
         public static void Orbwalker_OnPostAttack(Object sender, PostAttackEventArgs args)
