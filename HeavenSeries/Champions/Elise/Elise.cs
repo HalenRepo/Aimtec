@@ -44,6 +44,10 @@ namespace HeavenSeries
             E.SetSkillshot(0.25f, 55f, 1600, true, SkillshotType.Line);
 
             Menus();
+            MenuClass.combomenu.Add(new MenuSeperator("sepElise", "Use Human E (Caccoon) on: "));
+            foreach (Obj_AI_Hero enemies in GameObjects.EnemyHeroes)
+                MenuClass.combomenu.Add(new MenuBool("useeon" + enemies.ChampionName.ToLower(), enemies.ChampionName));
+
             Render.OnPresent += Render_OnPresent;
             Game.OnUpdate += Game_OnUpdate;
             Orbwalker.PostAttack += Orbwalker_OnPostAttack;
@@ -122,7 +126,7 @@ namespace HeavenSeries
             //Human
             if (HumanForm)
             {
-                if (target.IsInRange(E.Range)) //DO MENU CHECKS HERE
+                if (target.IsInRange(E.Range) && MenuClass.combohumanmenu["humane"].Enabled && MenuClass.combomenu["useeon" + target.ChampionName.ToLower()].Enabled) //DO MENU CHECKS HERE
                 {
                     var prediction = E.GetPrediction(target);
                     //Draw prediction
@@ -243,7 +247,7 @@ namespace HeavenSeries
                         {
                             return;
                         }
-                        W.Cast();
+                        W.Cast(minion);
                     }
                         
 
