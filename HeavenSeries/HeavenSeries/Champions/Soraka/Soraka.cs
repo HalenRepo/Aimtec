@@ -158,7 +158,7 @@ namespace HeavenSeries
             if (!R.Ready)
                 return;
 
-            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsAlly && !x.IsDead && x.CountEnemyHeroesInRange(2500) >= 1 && x.HealthPercent() < Menu["ultallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
+            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsAlly && !x.IsDead && Menu["ultallies"][x.ChampionName.ToLower()].Enabled && x.CountEnemyHeroesInRange(2500) >= 1 && x.HealthPercent() < Menu["ultallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
             {
                 //Additional R condition of being in 2500 range of an enemy -- UNTESTED
                      R.Cast();
@@ -178,7 +178,7 @@ namespace HeavenSeries
                 return;
             }
 
-            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && !x.IsMe &&x.IsAlly && !x.IsDead && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
+            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && !x.IsMe &&x.IsAlly && !x.IsDead && Menu["healallies"][x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
             {
                 if (Obj != null && Obj.IsInRange(W.Range) && !Player.IsRecalling())
                 {
