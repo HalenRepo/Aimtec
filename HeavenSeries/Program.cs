@@ -20,13 +20,25 @@
                     var Blitzcrank = new Blitzcrank();
                     break;
 
+                case "Elise":
+                    var Elise = new Elise();
+                    break;
+
                 case "Kindred":
                     var Kindred = new Kindred();
+                    break;
+
+                case "Nasus":
+                    var Nasus = new Nasus();
                     break;
 
                 case "Nidalee":
                      var Nidalee = new Nidalee();
                     break;
+
+               /* case "RekSai":
+                    var RekSai = new RekSai();
+                    break;*/
 
                 case "Soraka":
                     var Soraka = new Soraka();

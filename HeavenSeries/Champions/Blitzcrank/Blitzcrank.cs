@@ -13,6 +13,7 @@ using Aimtec.SDK.Util.Cache;
 
 using Spell = Aimtec.SDK.Spell;
 using Aimtec.SDK.Prediction.Skillshots;
+using Aimtec.SDK.Util;
 
 namespace HeavenSeries
 {
@@ -27,6 +28,8 @@ namespace HeavenSeries
         public static Spell E = new Spell(SpellSlot.E, 150f);
         public static Spell R = new Spell(SpellSlot.R, 550f);
 
+        public static IOrbwalker IOrbwalker = Orbwalker.Implementation;
+
         public Blitzcrank()
         {
             Orbwalker.Attach(Menu);
@@ -34,6 +37,7 @@ namespace HeavenSeries
             var ComboMenu = new Menu("combo", "Combo");
             {
                 ComboMenu.Add(new MenuBool("useq", "Use Q"));
+                ComboMenu.Add(new MenuSlider("predictionSlider", "Prediction (4 is the highest): ", 4, 1, 5));
                 ComboMenu.Add(new MenuBool("usee", "Use E "));
                 ComboMenu.Add(new MenuBool("user", "Use R"));
                 ComboMenu.Add(new MenuSliderBool("rAOE", "Minimum enemies for R", true, 1, 1, GameObjects.EnemyHeroes.Count()));
@@ -49,7 +53,7 @@ namespace HeavenSeries
             var DrawMenu = new Menu("draw", "Drawings");
             {
                 DrawMenu.Add(new MenuBool("drawQ", "Draw Q"));
-                DrawMenu.Add(new MenuBool("drawPrediction", "Draw Prediction"));
+                DrawMenu.Add(new MenuBool("drawPrediction", "Draw Q Prediction"));
             }
             Menu.Add(DrawMenu);
 
@@ -62,7 +66,9 @@ namespace HeavenSeries
 
             Render.OnPresent += Render_OnPresent;
             Game.OnUpdate += Game_OnUpdate;
-            
+            Orbwalker.PostAttack += Orbwalker_OnPostAttack;
+            Orbwalker.PreAttack += Orbwalker_OnPreAttack;
+
             Console.WriteLine("HeavenSeries - " + Player.ChampionName + " loaded.");
         }
 
@@ -88,6 +94,24 @@ namespace HeavenSeries
             //Basic Q range indicator
             if (Menu["draw"]["drawQ"].Enabled)
                 Render.Circle(Player.Position, Q.Range, 30, Color.White);
+        }
+
+        public static void Orbwalker_OnPostAttack(Object sender, PostAttackEventArgs args)
+        {
+            //For post attack. If none, return.
+            if (IOrbwalker.Mode == OrbwalkingMode.None)
+                return;
+
+            //E auto attack reset
+            if (!E.Ready)
+                return;
+
+            DelayAction.Queue(100 + Game.Ping, Orbwalker.ResetAutoAttackTimer);
+        }
+
+        public static void Orbwalker_OnPreAttack(object sender, PreAttackEventArgs args)
+        {
+
         }
 
 
@@ -138,7 +162,28 @@ namespace HeavenSeries
 
                 }
                 //If prediction high chance -> Q
-                if (prediction.HitChance >= HitChance.High)
+
+                HitChance slider = HitChance.High;
+                switch (Menu["combo"]["predictionSlider"].Value)
+                {
+                    case 1:
+                        slider = HitChance.Impossible;
+                        break;
+
+                    case 2:
+                        slider = HitChance.Low;
+                        break;
+
+                    case 3:
+                        slider = HitChance.Medium;
+                        break;
+
+                    case 4:
+                        slider = HitChance.High;
+                        break;
+                }
+                //if (prediction.HitChance >= HitChance.High)
+                if (prediction.HitChance >= slider)
                 {
                     Q.Cast(prediction.UnitPosition);
                 }
@@ -146,7 +191,7 @@ namespace HeavenSeries
             }
 
             //E logic - Avoid using E on already knocked up target
-            if (useE && E.Ready && target.IsValidTarget(150) && !target.HasBuffOfType(BuffType.Knockup))
+            if (useE && E.Ready && target.IsValidTarget(E.Range) && !target.HasBuffOfType(BuffType.Knockup))
             {
                 E.Cast();
             }

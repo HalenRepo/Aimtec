@@ -140,7 +140,7 @@ namespace HeavenSeries
                
                 if (prediction.HitChance >= HitChance.High)
                 {
-                    Javelin.Cast(prediction.CastPosition);
+                    Javelin.Cast(prediction.UnitPosition);
                 }
 
             }
