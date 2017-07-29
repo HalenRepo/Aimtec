@@ -189,7 +189,7 @@ namespace HeavenSeries
             //ACTUALLY HEAL PRIORITY ON AD
             var healTarget = ObjectManager.Get<Obj_AI_Hero>()
                         .Where(x => x.IsInRange(W.Range + 100) && x.IsAlly && !x.IsMe && !x.IsDead && Menu["healallies"][x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling())
-                            .OrderByDescending(xe => xe.FlatPhysicalDamageMod).FirstOrDefault();
+                            .OrderBy(xe => xe.Health).ThenBy(x => x.MaxHealth).FirstOrDefault();
 
             if (healTarget != null)
                 W.CastOnUnit(healTarget);
