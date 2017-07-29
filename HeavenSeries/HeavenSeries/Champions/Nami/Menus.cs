@@ -91,10 +91,10 @@ namespace HeavenSeries
                 Champions.Nami.MenuClass.drawmenu = new Menu("drawmenu", "Drawings");
                 {
                     
-                    Champions.Nami.MenuClass.miscmenu.Add(new MenuBool("drawq", "Draw Q"));
-                    Champions.Nami.MenuClass.miscmenu.Add(new MenuBool("draww", "Draw W"));
-                    Champions.Nami.MenuClass.miscmenu.Add(new MenuBool("drawe", "Draw E", false));
-                    Champions.Nami.MenuClass.miscmenu.Add(new MenuBool("drawr", "Draw R", false));
+                    Champions.Nami.MenuClass.drawmenu.Add(new MenuBool("drawq", "Draw Q"));
+                    Champions.Nami.MenuClass.drawmenu.Add(new MenuBool("draww", "Draw W"));
+                    Champions.Nami.MenuClass.drawmenu.Add(new MenuBool("drawe", "Draw E", false));
+                    Champions.Nami.MenuClass.drawmenu.Add(new MenuBool("drawr", "Draw R", false));
                 }
                 Champions.Nami.MenuClass.Root.Add(Champions.Nami.MenuClass.drawmenu);
 

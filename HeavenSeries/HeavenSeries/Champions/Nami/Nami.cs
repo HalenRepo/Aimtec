@@ -241,14 +241,22 @@ namespace HeavenSeries
         private void ChooseHeal()
         {
             //Force heal low ally
-            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && x.IsAlly && !x.IsDead && Champions.Nami.MenuClass.combowmenu["usewon" + x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Champions.Nami.MenuClass.combowmenu["usewon" + x.ChampionName.ToLower()].Value && !x.IsRecalling()))
-            {
-                if (Obj != null && Obj.IsInRange(W.Range) && !Player.IsRecalling())
-                {
-                    W.CastOnUnit(Obj);
-                    return;
-                }
-            }
+            /* foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && x.IsAlly && !x.IsDead && Champions.Nami.MenuClass.combowmenu["usewon" + x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Champions.Nami.MenuClass.combowmenu["usewon" + x.ChampionName.ToLower()].Value && !x.IsRecalling()))
+             {
+                 if (Obj != null && Obj.IsInRange(W.Range) && !Player.IsRecalling())
+                 {
+                     W.CastOnUnit(Obj);
+                     return;
+                 }
+             }*/
+
+            //ACTUALLY HEAL SQUISHY PRIORITY
+            var healTarget = ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(x => x.IsInRange(W.Range) && x.IsAlly && !x.IsDead && Champions.Nami.MenuClass.combowmenu["usewon" + x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Champions.Nami.MenuClass.combowmenu["usewon" + x.ChampionName.ToLower()].Value && !x.IsRecalling())
+                            .OrderBy(xe => xe.Health).ThenBy(x => x.MaxHealth).FirstOrDefault();
+
+            if (healTarget != null)
+                W.CastOnUnit(healTarget);
 
             if (Champions.Nami.MenuClass.combowmenu["usew"].Enabled)
             {
