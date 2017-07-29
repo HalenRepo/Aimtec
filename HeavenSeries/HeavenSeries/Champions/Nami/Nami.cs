@@ -258,29 +258,60 @@ namespace HeavenSeries
             if (healTarget != null)
                 W.CastOnUnit(healTarget);
 
-            if (Champions.Nami.MenuClass.combowmenu["usew"].Enabled)
+            if (IOrbwalker.Mode == OrbwalkingMode.Combo)
             {
-                var target = TargetSelector.GetTarget(W.Range + (W.Range /2));
-
-                if (target != null && Champions.Nami.MenuClass.combowmenu["usewonbounce" + target.ChampionName.ToLower()].Enabled)
+                if (Champions.Nami.MenuClass.combowmenu["usew"].Enabled)
                 {
-                    if (Player.Distance(target) > W.Range) //find a bounce! Let's bounce!
-                    {
-                        var bouncetarget = ObjectManager.Get<Obj_AI_Hero>()
-                            .SingleOrDefault(x => x.IsEnemy && x.IsInRange(W.Range) && x.Distance(target) < W.Range);
+                    var target = TargetSelector.GetTarget((W.Range * 2) - 100);
 
-                        if (bouncetarget != null && bouncetarget.MaxHealth - bouncetarget.Health > WHeal)
-                        {
-                            W.CastOnUnit(bouncetarget);
-                        }
-                    }
-                    else
+                    if (target != null && Champions.Nami.MenuClass.combowmenu["usewonbounce" + target.ChampionName.ToLower()].Enabled)
                     {
-                        //then target is in range
-                        W.CastOnUnit(target);
+                        if (Player.Distance(target) > W.Range) //find a bounce! Let's bounce!
+                        {
+                            var bouncetarget = ObjectManager.Get<Obj_AI_Hero>()
+                                .SingleOrDefault(x => x.IsEnemy && x.IsInRange(W.Range) && x.Distance(target) < W.Range);
+
+                            if (bouncetarget != null && bouncetarget.MaxHealth - bouncetarget.Health > WHeal)
+                            {
+                                W.CastOnUnit(bouncetarget);
+                            }
+                        }
+                        else
+                        {
+                            //then target is in range
+                            W.CastOnUnit(target);
+                        }
                     }
                 }
             }
+            else if (IOrbwalker.Mode == OrbwalkingMode.Mixed)
+            {
+                if (Champions.Nami.MenuClass.harasswmenu["usew"].Enabled)
+                {
+                    var target = TargetSelector.GetTarget((W.Range * 2) - 100);
+
+                    if (target != null && Champions.Nami.MenuClass.harasswmenu["usewonbounce" + target.ChampionName.ToLower()].Enabled)
+                    {
+                        if (Player.Distance(target) > W.Range) //find a bounce! Let's bounce!
+                        {
+                            var bouncetarget = ObjectManager.Get<Obj_AI_Hero>()
+                                .SingleOrDefault(x => x.IsEnemy && x.IsInRange(W.Range) && x.Distance(target) < W.Range);
+
+                            if (bouncetarget != null && bouncetarget.MaxHealth - bouncetarget.Health > WHeal)
+                            {
+                                W.CastOnUnit(bouncetarget);
+                            }
+                        }
+                        else
+                        {
+                            //then target is in range
+                            W.CastOnUnit(target);
+                        }
+                    }
+                }
+            }
+
+            
         }
 
         private void JungleClear()
