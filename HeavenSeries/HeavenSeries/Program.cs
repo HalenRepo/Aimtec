@@ -32,9 +32,9 @@
                     var Nami = new Nami();
                     break;
 
-                case "Nasus":
+                /*case "Nasus":
                     var Nasus = new Nasus();
-                    break;
+                    break;*/
 
                 case "Nidalee":
                      var Nidalee = new Nidalee();
