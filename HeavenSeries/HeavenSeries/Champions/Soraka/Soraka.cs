@@ -178,13 +178,21 @@ namespace HeavenSeries
                 return;
             }
 
-            foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && !x.IsMe &&x.IsAlly && !x.IsDead && Menu["healallies"][x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
+            /*foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(W.Range) && !x.IsMe &&x.IsAlly && !x.IsDead && Menu["healallies"][x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling()))
             {
                 if (Obj != null && Obj.IsInRange(W.Range) && !Player.IsRecalling())
                 {
                     W.CastOnUnit(Obj);
                 }
-            }
+            }*/
+
+            //ACTUALLY HEAL PRIORITY ON AD
+            var healTarget = ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(x => x.IsInRange(W.Range + 100) && x.IsAlly && !x.IsMe && !x.IsDead && Menu["healallies"][x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Menu["healallies"][x.ChampionName.ToLower()].Value && !x.IsRecalling())
+                            .OrderByDescending(xe => xe.FlatPhysicalDamageMod).FirstOrDefault();
+
+            if (healTarget != null)
+                W.CastOnUnit(healTarget);
         }
 
         private void Mixed()

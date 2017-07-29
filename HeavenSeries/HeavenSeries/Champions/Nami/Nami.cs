@@ -115,13 +115,13 @@ namespace HeavenSeries
                 Render.Circle(Player.Position, Q.Range, 30, Color.White);
 
             if (Champions.Nami.MenuClass.drawmenu["draww"].Enabled)
-                Render.Circle(Player.Position, Q.Range, 30, Color.White);
+                Render.Circle(Player.Position, W.Range, 30, Color.White);
 
             if (Champions.Nami.MenuClass.drawmenu["drawe"].Enabled)
-                Render.Circle(Player.Position, Q.Range, 30, Color.White);
+                Render.Circle(Player.Position, E.Range, 30, Color.White);
 
             if (Champions.Nami.MenuClass.drawmenu["drawr"].Enabled)
-                Render.Circle(Player.Position, Q.Range, 30, Color.White);
+                Render.Circle(Player.Position, R.Range, 30, Color.White);
 
         }
         public static void Orbwalker_OnPostAttack(Object sender, PostAttackEventArgs args)
