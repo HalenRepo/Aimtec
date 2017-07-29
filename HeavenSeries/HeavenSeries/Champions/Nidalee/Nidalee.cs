@@ -81,6 +81,10 @@ namespace HeavenSeries
                     Combo();
                     break;
 
+                case OrbwalkingMode.Mixed:
+                    Mixed();
+                    break;
+
                 case OrbwalkingMode.Laneclear:
                     LaneClear(); //TODO
                     JungleClear();
@@ -351,6 +355,21 @@ namespace HeavenSeries
 
 
 
+        }
+
+        private void Mixed()
+        {
+            var qtarget = TargetSelector.GetTarget(Q.Range);
+
+            if (qtarget == null)
+                return;
+
+            if (!cougarForm && HQ == 0)
+            {
+                var prediction = Q.GetPrediction(qtarget);
+                if (prediction.HitChance >= HitChance.High)
+                    Q.Cast(prediction.UnitPosition);
+            }
         }
 
         private static float CougarDamage(Obj_AI_Base target)
