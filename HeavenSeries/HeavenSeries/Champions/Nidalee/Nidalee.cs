@@ -364,7 +364,7 @@ namespace HeavenSeries
             if (qtarget == null)
                 return;
 
-            if (!cougarForm && HQ == 0)
+            if (!cougarForm && Q.Ready)
             {
                 var prediction = Q.GetPrediction(qtarget);
                 if (prediction.HitChance >= HitChance.High)
