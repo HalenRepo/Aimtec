@@ -36,10 +36,6 @@
                     var Nami = new Nami();
                     break;
 
-                /*case "Nasus":
-                    var Nasus = new Nasus();
-                    break;*/
-
                 case "Nidalee":
                      var Nidalee = new Nidalee();
                     break;
