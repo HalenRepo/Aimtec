@@ -55,6 +55,9 @@
     <Compile Include="Champions\Elise\Elise.cs" />
     <Compile Include="Champions\Elise\MenuClass.cs" />
     <Compile Include="Champions\Elise\Menus.cs" />
+    <Compile Include="Champions\Fizz\Fizz.cs" />
+    <Compile Include="Champions\Fizz\MenuClass.cs" />
+    <Compile Include="Champions\Fizz\Menus.cs" />
     <Compile Include="Champions\Kindred\Kindred.cs" />
     <Compile Include="Champions\Nami\MenuClass.cs" />
     <Compile Include="Champions\Nami\Menus.cs" />
@@ -65,7 +68,8 @@
     <Compile Include="Champions\Nidalee\Nidalee.cs" />
     <Compile Include="Champions\RekSai\RekSai.cs" />
     <Compile Include="Champions\Soraka\Soraka.cs" />
-    <Compile Include="Champions\Thresh\Thresh.cs" />
+    <Compile Include="Champions\Thresh\MenuClass.cs" />
+    <Compile Include="Champions\Thresh\Menus.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

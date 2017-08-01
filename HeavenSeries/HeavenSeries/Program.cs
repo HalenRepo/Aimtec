@@ -24,6 +24,10 @@
                     var Elise = new Elise();
                     break;
 
+                case "Fizz":
+                    var Fizz = new Fizz();
+                    break;
+
                 case "Kindred":
                     var Kindred = new Kindred();
                     break;
