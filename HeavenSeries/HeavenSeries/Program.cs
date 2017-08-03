@@ -28,6 +28,10 @@
                     var Fizz = new Fizz();
                     break;
 
+                case "Khazix":
+                    var Khazix = new KhaZix();
+                    break;
+
                 case "Kindred":
                     var Kindred = new Kindred();
                     break;

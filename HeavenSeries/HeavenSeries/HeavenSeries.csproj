@@ -58,6 +58,9 @@
     <Compile Include="Champions\Fizz\Fizz.cs" />
     <Compile Include="Champions\Fizz\MenuClass.cs" />
     <Compile Include="Champions\Fizz\Menus.cs" />
+    <Compile Include="Champions\KhaZix\KhaZix.cs" />
+    <Compile Include="Champions\KhaZix\MenuClass.cs" />
+    <Compile Include="Champions\KhaZix\Menus.cs" />
     <Compile Include="Champions\Kindred\Kindred.cs" />
     <Compile Include="Champions\Nami\MenuClass.cs" />
     <Compile Include="Champions\Nami\Menus.cs" />
