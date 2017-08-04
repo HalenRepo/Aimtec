@@ -9,6 +9,7 @@
     using Aimtec.SDK.Menu;
     using Aimtec.SDK.Menu.Components;
     using Aimtec.SDK.Util.Cache;
+    using System;
 
     internal class Last_Hit_Marker
     {
@@ -69,10 +70,36 @@
                     break;
             }
 
-            foreach (var minion in GameObjects.EnemyMinions.Where(x => x.UnitSkinName.Contains("Minion") && x.IsValidTarget() && x.IsInRange(Menu["settingsmenu"]["rangeslider"].Value) && x.Health <= Player.GetAutoAttackDamage(x) && !x.UnitSkinName.Contains("Odin")).ToList())
+            if (Player.ChampionName == "Vayne")
             {
-                Render.Circle(minion.ServerPosition, Menu["DrawMenu"]["circlesize"].Value, 30, Color);
+                foreach (var minion in GameObjects.EnemyMinions.Where(x => x.UnitSkinName.Contains("Minion") && x.IsValidTarget() && x.IsInRange(Menu["settingsmenu"]["rangeslider"].Value) && !x.UnitSkinName.Contains("Odin")).ToList())
+                {
+                    double boltdamage = 0;
+                    if (minion.GetBuffCount("vaynesilvereddebuff") == 2)
+                    {
+                        boltdamage = Player.GetSpellDamage(minion, SpellSlot.W);
+                    }
+                    else
+                    {
+                        boltdamage = 0;
+                    }
+
+                    if (minion.Health <= Player.GetAutoAttackDamage(minion) + boltdamage)
+                    {
+                        Render.Circle(minion.ServerPosition, Menu["DrawMenu"]["circlesize"].Value, 30, Color);
+                    }
+                        
+                }
             }
+            else
+            {
+                foreach (var minion in GameObjects.EnemyMinions.Where(x => x.UnitSkinName.Contains("Minion") && x.IsValidTarget() && x.IsInRange(Menu["settingsmenu"]["rangeslider"].Value) && x.Health <= Player.GetAutoAttackDamage(x) && !x.UnitSkinName.Contains("Odin")).ToList())
+                {
+                    Render.Circle(minion.ServerPosition, Menu["DrawMenu"]["circlesize"].Value, 30, Color);
+                }
+            }
+
+            
         }
     }
 }
