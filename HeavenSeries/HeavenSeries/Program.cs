@@ -32,9 +32,9 @@
                     var Fizz = new Fizz();
                     break;
 
-                /*case "Khazix":
+                case "Khazix":
                     var Khazix = new KhaZix();
-                    break;*/
+                    break;
 
                 case "Kindred":
                     var Kindred = new Kindred();

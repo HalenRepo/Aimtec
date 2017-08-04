@@ -204,7 +204,7 @@ namespace HeavenSeries
             {
                 //Console.WriteLine(Game.ClockTime + " assassin combo");
                 //Look for reset!
-                var JumpPoint1 = GetDoubleJumpPoint(target);
+                var JumpPoint1 = GetDoubleJumpPoint(target, true);
                 E.Cast(JumpPoint1.To2D());
                 Q.Cast(target);
                 DelayAction.Queue(Game.Ping + 300, () =>
@@ -219,7 +219,7 @@ namespace HeavenSeries
             }
             else
             {
-                Console.WriteLine(Game.ClockTime + " standard combo");
+                //Console.WriteLine(Game.ClockTime + " standard combo");
                 //STANDARD COMBO
                 /*if (Champions.KhaZix.MenuClass.combomenu["user"].Enabled && Player.CountEnemyHeroesInRange(E.Range) >= Champions.KhaZix.MenuClass.combomenu["minenemies"].Value)
                 {
@@ -254,8 +254,13 @@ namespace HeavenSeries
         }
 
         //Credits to @Seph for some of this logic
-        Vector3 GetDoubleJumpPoint(Obj_AI_Hero Qtarget, bool firstjump = true)
+        Vector3 GetDoubleJumpPoint(Obj_AI_Hero Qtarget, bool firstjump)
         {
+            if (firstjump == true)
+            {
+                return Qtarget.ServerPosition;
+            }
+
             Obj_AI_Turret closestTower = ObjectManager.Get<Obj_AI_Turret>().Where(tur => tur.IsAlly).OrderBy(tur => tur.Distance(Player.Position)).First();
 
             //Jump back to friendly closest turret
