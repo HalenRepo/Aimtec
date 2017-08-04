@@ -202,7 +202,7 @@ namespace HeavenSeries
 
             if (Champions.KhaZix.MenuClass.assassinmenutargets[target.ChampionName.ToLower()].Enabled)
             {
-                Console.WriteLine(Game.ClockTime + " assassin combo");
+                //Console.WriteLine(Game.ClockTime + " assassin combo");
                 //Look for reset!
                 var JumpPoint1 = GetDoubleJumpPoint(target);
                 E.Cast(JumpPoint1.To2D());
@@ -277,7 +277,7 @@ namespace HeavenSeries
             }
 
             Vector3 Position = new Vector3();
-            var jumptarget = ObjectManager.Get<Obj_AI_Hero>().Where(x => Champions.KhaZix.MenuClass.assassinmenutargets[x.ChampionName.ToLower()].Enabled 
+            var jumptarget = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && Champions.KhaZix.MenuClass.assassinmenutargets[x.ChampionName.ToLower()].Enabled 
             && x.HealthPercent() <= Champions.KhaZix.MenuClass.assassinmenutargets[x.ChampionName.ToLower()].Value && x.IsValidTarget() && x.IsValidSpellTarget() 
             && x.IsEnemy && !x.IsDead && !x.IsInvulnerable && x != Qtarget).FirstOrDefault(x => x.IsInRange(E.Range));
 

@@ -20,6 +20,10 @@
                     var Blitzcrank = new Blitzcrank();
                     break;
 
+                /*case "Camille":
+                    var Camille = new Camille();
+                    break;*/
+
                 case "Elise":
                     var Elise = new Elise();
                     break;

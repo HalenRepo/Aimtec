@@ -100,12 +100,18 @@ namespace HeavenSeries
 
         private void Combo()
         {
-            //E logic
-            //find suitable ally for E that IS NOT NAMI
+            var target = TargetSelector.GetTarget(E.Range);
+
+            if (target == null)
+                return;
+
             
-
-
+            
         }
+
+
+
+
 
         private void Harass()
         {
