@@ -207,13 +207,25 @@ namespace HeavenSeries
                 var JumpPoint1 = GetDoubleJumpPoint(target, true);
                 E.Cast(JumpPoint1.To2D());
                 Q.Cast(target);
+
+                if (Champions.KhaZix.MenuClass.combomenu["usew"].Enabled && W.Ready)
+                {
+                    var prediction = W.GetPrediction(target);
+                    if (prediction.HitChance >= HitChance.High)
+                        W.Cast(prediction.UnitPosition);
+                }
+
                 DelayAction.Queue(Game.Ping + 300, () =>
                 {
                     if (E.Ready && !isMidAir)
                     {
                         //2nd jump
                         var Jumppoint2 = GetDoubleJumpPoint(target, false);
-                        E.Cast(Jumppoint2.To2D());
+                        if (Jumppoint2 != null && Jumppoint2.X != 0 && Jumppoint2.Y != 0)
+                        {
+                            E.Cast(Jumppoint2.To2D());
+                        }
+                            
                     }
                 });
             }
@@ -291,12 +303,17 @@ namespace HeavenSeries
                 Position = jumptarget.ServerPosition;
             }
 
-            //Then to safety
+            if (Champions.KhaZix.MenuClass.assassinmenu["emode"].Value == 1)
+            {
+                return Position;
+            }
+
+            //Then to safety because no other targets
             if (jumptarget == null)
             {
                 return Player.ServerPosition.Extend(closestTower.ServerPosition, E.Range);
             }
-
+            
             return Position;
         }
 
