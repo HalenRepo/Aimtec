@@ -1,22 +1,20 @@
-﻿namespace Last_Hit
+﻿using System.Drawing;
+using System.Linq;
+
+using Aimtec;
+using Aimtec.SDK.Damage;
+using Aimtec.SDK.Extensions;
+using Aimtec.SDK.Menu;
+using Aimtec.SDK.Menu.Components;
+using Aimtec.SDK.Util.Cache;
+
+namespace Last_Hit
 {
-    using System.Drawing;
-    using System.Linq;
-
-    using Aimtec;
-    using Aimtec.SDK.Damage;
-    using Aimtec.SDK.Extensions;
-    using Aimtec.SDK.Menu;
-    using Aimtec.SDK.Menu.Components;
-    using Aimtec.SDK.Util.Cache;
-    using System;
-
     internal class Last_Hit_Marker
     {
         public static Menu Menu = new Menu("LastHit", "Last Hit Marker by Halen", true);
         public static Obj_AI_Hero Player => ObjectManager.GetLocalPlayer();
         public static Color Color;
-
 
         public Last_Hit_Marker()
         {
@@ -31,7 +29,6 @@
                 DrawMenu.Add(new MenuBool("drawminion", "Draw Last Hit Marker", true));
                 DrawMenu.Add(new MenuSlider("circlesize", "Circle Size", 60, 1, 150));
                 DrawMenu.Add(new MenuList("color", "Color: ", new[] { "Orange", "Red", "Blue", "Light Green" }, 0));
-
             }
             Menu.Add(DrawMenu);
 
@@ -47,7 +44,7 @@
                 return;
             }
 
-            switch(Menu["DrawMenu"]["color"].Value)
+            switch (Menu["DrawMenu"]["color"].Value)
             {
                 case 0:
                     Color = Color.Orange;
@@ -88,7 +85,6 @@
                     {
                         Render.Circle(minion.ServerPosition, Menu["DrawMenu"]["circlesize"].Value, 30, Color);
                     }
-                        
                 }
             }
             else
@@ -98,8 +94,6 @@
                     Render.Circle(minion.ServerPosition, Menu["DrawMenu"]["circlesize"].Value, 30, Color);
                 }
             }
-
-            
         }
     }
 }
