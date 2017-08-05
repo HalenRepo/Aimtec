@@ -230,7 +230,7 @@ namespace HeavenSeries
 
         private void Combo()
         {
-            var target = TargetSelector.GetTarget(1200); //1200?
+            var target = TargetSelector.GetTarget(1200);
 
             if (target == null)
                 return;
@@ -249,11 +249,11 @@ namespace HeavenSeries
                 if((CW == 0 || catW.Ready) && Champions.Nidalee.MenuClass.combocatmenu["usew"].Enabled && (target.Distance(Player.ServerPosition) <= 750 || CougarDamage(target) >= target.Health))
                 {
                     //Check if pounce target is marked
-                    if (TargetHunted(target) & target.Distance(Player.ServerPosition) <= 750*750)
+                    if (TargetHunted(target) & target.Distance(Player.ServerPosition) <= 750)
                     {
                         catW.Cast(target.ServerPosition);
                     }
-                    else if (target.Distance(Player.ServerPosition) <= 400*400)
+                    else if (target.Distance(Player.ServerPosition) <= 400)
                     {
                         catW.Cast(target.ServerPosition);
                     }
@@ -330,12 +330,12 @@ namespace HeavenSeries
                 {
                     if ((CW == 0 || catW.Ready) && (CQ == 0 || CE == 0))
                     {
-                        if (TargetHunted(target) && target.Distance(Player.ServerPosition) <= 750*750)
+                        if (TargetHunted(target) && target.Distance(Player.ServerPosition) <= 750)
                         {
                             R.Cast();
                         }
 
-                        if (target.Health <= CougarDamage(target) && target.Distance(Player.ServerPosition) <= 350*350)
+                        if (target.Health <= CougarDamage(target) && target.Distance(Player.ServerPosition) <= 350)
                         {
                             R.Cast();
                         }
@@ -412,7 +412,7 @@ namespace HeavenSeries
                     }
                 }
 
-                if (TargetHunted(m) & m.Distance(Player.ServerPosition) <= 750*750 && (CW == 0 || catW.Ready))
+                if (TargetHunted(m) & m.Distance(Player.ServerPosition) <= 750 && (CW == 0 || catW.Ready))
                 {
                     if (Champions.Nidalee.MenuClass.junglecatmenu["usew"].Enabled)
                     {
@@ -420,7 +420,7 @@ namespace HeavenSeries
                     }
                         
                 }
-                else if (m.Distance(Player.ServerPosition) <= 400*400 && (CW == 0 || W.Ready))
+                else if (m.Distance(Player.ServerPosition) <= 400 && (CW == 0 || W.Ready))
                 {
                     if (Champions.Nidalee.MenuClass.junglecatmenu["usew"].Enabled)
                     {
@@ -478,9 +478,9 @@ namespace HeavenSeries
                     {
                         if (CQ == 0 && CE == 0 && (CW == 0 || catW.Ready))
                         {
-                            if (TargetHunted(m) & m.Distance(Player.ServerPosition) <= 750 * 750)
+                            if (TargetHunted(m) & m.Distance(Player.ServerPosition) <= 750)
                                 R.Cast();
-                            else if (m.Distance(Player.ServerPosition) <= 450 * 450)
+                            else if (m.Distance(Player.ServerPosition) <= 450)
                                 R.Cast();
                         }
                     }
