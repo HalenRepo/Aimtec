@@ -62,6 +62,8 @@
     <Compile Include="Champions\KhaZix\MenuClass.cs" />
     <Compile Include="Champions\KhaZix\Menus.cs" />
     <Compile Include="Champions\Kindred\Kindred.cs" />
+    <Compile Include="Champions\Kindred\MenuClass.cs" />
+    <Compile Include="Champions\Kindred\Menus.cs" />
     <Compile Include="Champions\Nami\MenuClass.cs" />
     <Compile Include="Champions\Nami\Menus.cs" />
     <Compile Include="Champions\Nami\Nami.cs" />

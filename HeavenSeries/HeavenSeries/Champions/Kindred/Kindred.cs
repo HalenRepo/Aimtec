@@ -17,7 +17,7 @@
     using Aimtec.SDK.Prediction.Skillshots;
     using Aimtec.SDK.Util;
 
-    internal class Kindred
+    internal partial class Kindred
     {
         public static Menu Menu = new Menu("HeavenSeries", "HeavenSeries - " + Player.ChampionName, true);
         public static Orbwalker Orbwalker = new Orbwalker();
@@ -31,56 +31,17 @@
         public static Spell R = new Spell(SpellSlot.R, 500);
 
         public static IOrbwalker IOrbwalker = Orbwalker.Implementation;
-        
+
 
         public Kindred()
         {
-            Orbwalker.Attach(Menu);
-
-            var ComboMenu = new Menu("combo", "Combo");
-            {
-                ComboMenu.Add(new MenuBool("useq", "Use Q"));
-                ComboMenu.Add(new MenuBool("usew", "Use W"));
-                ComboMenu.Add(new MenuBool("usee", "Use E "));
-            }
-            Menu.Add(ComboMenu);
-
-            var JungleClear = new Menu("jungleclear", "Jungle Clear");
-            {
-                JungleClear.Add(new MenuBool("useq", "Use Q"));
-                JungleClear.Add(new MenuBool("usew", "Use W"));
-                JungleClear.Add(new MenuBool("usee", "Use E "));
-            }
-            Menu.Add(JungleClear);
-
-            var UltMenu = new Menu("UltMenu", "R Settings");
-            {
-                UltMenu.Add(new MenuBool("autor", "Auto R"));
-                //UltMenu.Add(new MenuSlider("allyhealth", "Ally Health % to use R", 15, 1, 99, false));
-                UltMenu.Add(new MenuSlider("enemies", "Min. Enemies near Ally to use R", 2, 1, GameObjects.EnemyHeroes.Count(), false));
-
-                UltMenu.Add(new MenuSeperator("sepKindred", "Auto R Settings"));
-
-                foreach (Obj_AI_Hero allies in GameObjects.AllyHeroes)
-                    UltMenu.Add(new MenuSliderBool("useron" + allies.ChampionName.ToLower(), "Save " + allies.ChampionName + " at %HP", true, 15, 1, 99));
-            }
-            Menu.Add(UltMenu);
-
-            var DrawMenu = new Menu("DrawMenu", "Drawings");
-            {
-                DrawMenu.Add(new MenuBool("drawq", "Draw Q", false));
-                DrawMenu.Add(new MenuBool("drawe", "Draw E", false));
-                DrawMenu.Add(new MenuBool("drawr", "Draw R"));
-            }
-            Menu.Add(DrawMenu);
-
-            Menu.Attach();
+            Menus();
 
             Game.OnUpdate += Game_OnUpdate;
             Render.OnPresent += Render_OnPresent;
             Orbwalker.PostAttack += Orbwalker_OnPostAttack;
             Orbwalker.PreAttack += Orbwalker_OnPreAttack;
-            
+
 
             Console.WriteLine("HeavenSeries - " + Player.ChampionName + " loaded.");
         }
@@ -145,30 +106,34 @@
                     Combo();
                     break;
 
+                case OrbwalkingMode.Mixed:
+                    Mixed();
+                    break;
+
                 case OrbwalkingMode.Laneclear:
                     LaneClear(); //TODO
                     JungleClear();
                     break;
             }
 
-            if (Menu["UltMenu"]["autor"].Enabled && R.Ready)
+            if (Champions.Kindred.MenuClass.rsettingsmenu["autor"].Enabled && R.Ready)
                 AutoR();
         }
 
         private static void Render_OnPresent()
         {
             //Drawings
-            if (Menu["DrawMenu"]["drawq"].Enabled)
+            if (Champions.Kindred.MenuClass.drawmenu["drawq"].Enabled)
                 Render.Circle(Player.Position, Q.Range, 30, Color.White);
 
-            if (Menu["DrawMenu"]["drawr"].Enabled)
+            if (Champions.Kindred.MenuClass.drawmenu["drawr"].Enabled)
                 Render.Circle(Player.Position, R.Range, 30, Color.White);
 
-            if (Menu["DrawMenu"]["drawe"].Enabled)
+            if (Champions.Kindred.MenuClass.drawmenu["drawe"].Enabled)
                 Render.Circle(Player.Position, E.Range + erangemodifier, 30, Color.White);
         }
 
-        
+
 
         public static void Orbwalker_OnPostAttack(Object sender, PostAttackEventArgs args)
         {
@@ -180,6 +145,22 @@
 
             if (!Q.Ready) // || !target.IsValidTarget(Player.AttackRange
                 return;
+
+            if (IOrbwalker.Mode == OrbwalkingMode.Laneclear)
+            {
+                if (!Champions.Kindred.MenuClass.JungleClearq["useq"].Enabled || Player.ManaPercent() < Champions.Kindred.MenuClass.JungleClearq["useqmana"].Value)
+                {
+                    return;
+                }
+            }
+
+            if (IOrbwalker.Mode == OrbwalkingMode.Mixed)
+            {
+                if (!Champions.Kindred.MenuClass.harassqmenu["useq"].Enabled || Player.ManaPercent() < Champions.Kindred.MenuClass.harassqmenu["useqmana"].Value)
+                {
+                    return;
+                }
+            }
 
             //First Q logic - just Q to mouse
             Q.Cast(dashPosition);
@@ -202,11 +183,11 @@
                         IOrbwalker.ForceTarget(minion);
                     }
                 }
- 
+
             }
 
             //Focus kindredcharge target
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget() && x.Distance(Player) < Player.AttackRange && x.IsVisible)) 
+            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget() && x.Distance(Player) < Player.AttackRange && x.IsVisible))
             {
                 if (!target.HasBuff("kindredecharge") || target == null)
                     return;
@@ -217,16 +198,19 @@
 
         private static void AutoR()
         {
-            var target = TargetSelector.GetTarget(W.Range);
-            if (!R.Ready && target != null)
+            var target = TargetSelector.GetTarget(R.Range);
+            if (!R.Ready || target == null)
+            {
                 return;
+            }
+                
 
             foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValid && x.IsAlly && x.IsVisible && x.Distance(Player) < R.Range &&
-            x.CountEnemyHeroesInRange(R.Range) <= Menu["UltMenu"]["enemies"].Value && Menu["UltMenu"]["useron" + x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Menu["UltMenu"]["useron" + x.ChampionName.ToLower()].Value))
-            {    
+            x.CountEnemyHeroesInRange(750) <= Champions.Kindred.MenuClass.rsettingsmenu["enemies"].Value && Champions.Kindred.MenuClass.rwhitelist[x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Champions.Kindred.MenuClass.rwhitelist[x.ChampionName.ToLower()].Value))
+            {    //enemiesheroesinrange used to be R.Range
 
                 if (target.Distance(Obj) > 550)
-                    return;
+                     return;
 
                 if (Player.Distance(Obj) < R.Range)
                     R.Cast();
@@ -245,19 +229,19 @@
                 //TODO GRAB CDR of Q. If Q = 4, RECAST W. Add to below with ||
                 if (Q.Ready || target.HealthPercent() < 15 || Player.SpellBook.GetSpell(SpellSlot.Q).Cooldown == 4)
                 {
-                    if (Menu["combo"]["usew"].Enabled)
-                    W.Cast();
+                    if (Champions.Kindred.MenuClass.combowmenu["usew"].Enabled)
+                        W.Cast();
                 }
-                    
+
             }
 
-            if (E.Ready && target.IsValidTarget(E.Range + erangemodifier) && Menu["combo"]["usee"].Enabled)
+            if (E.Ready && target.IsValidTarget(E.Range + erangemodifier) && Champions.Kindred.MenuClass.comboemenu["usee"].Enabled)
                 E.Cast(target);
 
             var dashPosition = Player.Position.Extend(Game.CursorPos, 320);
-            
+
             //logic with auto attack resets
-            if (Player.Distance(target) > Player.AttackRange && Player.Distance(target) < Q.Range)
+            if (Q.Ready && Player.Distance(target) > Player.AttackRange && Player.Distance(target) < Q.Range)
             {
                 Q.Cast(dashPosition);
                 if (target.Distance(Player) < Player.AttackRange)
@@ -266,9 +250,41 @@
                 }
                 DelayAction.Queue(Game.Ping, IOrbwalker.ResetAutoAttackTimer);
             }
+        }
 
-            if (!R.Ready)
+        private void Mixed()
+        {
+            var target = TargetSelector.GetTarget(W.Range);
+
+            if (target == null)
                 return;
+
+            if (W.Ready)
+            {
+                //TODO GRAB CDR of Q. If Q = 4, RECAST W. Add to below with ||
+                if (Q.Ready || target.HealthPercent() < 15 || Player.SpellBook.GetSpell(SpellSlot.Q).Cooldown == 4)
+                {
+                    if (Champions.Kindred.MenuClass.harasswmenu["usew"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.harasswmenu["usewmana"].Value)
+                        W.Cast();
+                }
+
+            }
+
+            if (E.Ready && target.IsValidTarget(E.Range + erangemodifier) && Champions.Kindred.MenuClass.harassemenu["usee"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.harassemenu["useemana"].Value)
+                E.Cast(target);
+
+            var dashPosition = Player.Position.Extend(Game.CursorPos, 320);
+
+            //logic with auto attack resets
+            if (Q.Ready && Champions.Kindred.MenuClass.harassqmenu["useq"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.harassqmenu["useqmana"].Value && Player.Distance(target) > Player.AttackRange && Player.Distance(target) < Q.Range)
+            {
+                Q.Cast(dashPosition);
+                if (target.Distance(Player) < Player.AttackRange)
+                {
+                    Player.IssueOrder(OrderType.AutoAttack, target);
+                }
+                DelayAction.Queue(Game.Ping, IOrbwalker.ResetAutoAttackTimer);
+            }
         }
 
         private void JungleClear()
@@ -281,13 +297,13 @@
                 return;
             foreach (var minion in minions)
             {
-                if (W.Ready && Menu["jungleclear"]["usew"].Enabled)
+                if (W.Ready && Champions.Kindred.MenuClass.JungleClearw["usew"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleClearw["usewmana"].Value)
                     W.Cast();
 
-                if (Q.Ready && Menu["jungleclear"]["useq"].Enabled)
+                if (Q.Ready && Champions.Kindred.MenuClass.JungleClearq["useq"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleClearq["useqmana"].Value)
                     Q.Cast(dashPosition);
 
-                if (E.Ready && Menu["jungleclear"]["usee"].Enabled)
+                if (E.Ready && Champions.Kindred.MenuClass.JungleCleare["usee"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleCleare["useemana"].Value)
                     E.Cast(minion);
             }
         }
