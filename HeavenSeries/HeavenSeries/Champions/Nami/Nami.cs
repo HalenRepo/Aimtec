@@ -62,6 +62,10 @@ namespace HeavenSeries
             foreach (Obj_AI_Hero allies in GameObjects.AllyHeroes)
                 Champions.Nami.MenuClass.harasswmenu.Add(new MenuBool("useeon" + allies.ChampionName.ToLower(), allies.ChampionName));
 
+            Champions.Nami.MenuClass.harasswmenu.Add(new MenuSeperator("sepHeal2", "Use W (Damage) on: "));
+            foreach (Obj_AI_Hero enemies in GameObjects.EnemyHeroes)
+                Champions.Nami.MenuClass.harasswmenu.Add(new MenuBool("usewonbounce" + enemies.ChampionName.ToLower(), enemies.ChampionName, true));
+
             Champions.Nami.MenuClass.harassemenu.Add(new MenuSeperator("sepE", "Use E on: "));
             foreach (Obj_AI_Hero allies in GameObjects.AllyHeroes)
                 Champions.Nami.MenuClass.harassemenu.Add(new MenuBool("useeon" + allies.ChampionName.ToLower(), allies.ChampionName));
@@ -142,22 +146,6 @@ namespace HeavenSeries
                 return;
             }
 
-            switch (Orbwalker.Mode)
-            {
-                case OrbwalkingMode.Combo:
-                    Combo();
-                    break;
-
-                case OrbwalkingMode.Mixed:
-                    Harass();
-                    break;
-
-                case OrbwalkingMode.Laneclear:
-                    LaneClear(); //TODO
-                    JungleClear();
-                    break;
-            }
-
             if (Champions.Nami.MenuClass.miscmenu["autoheal"].Enabled)
             {
                 ChooseHeal();
@@ -167,7 +155,7 @@ namespace HeavenSeries
             {
                 if (target != null && Q.Ready && target.IsInRange(Q.Range))
                 {
-                    if (target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Stun) 
+                    if (target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Stun)
                         || target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Snare))
                     {
                         var prediction = Q.GetPrediction(target);
@@ -179,6 +167,22 @@ namespace HeavenSeries
                     }
                 }
             }
+
+            switch (Orbwalker.Mode)
+            {
+                case OrbwalkingMode.Combo:
+                    Combo();
+                    break;
+
+                case OrbwalkingMode.Mixed:
+                    Mixed();
+                    break;
+
+                case OrbwalkingMode.Laneclear:
+                    LaneClear(); //TODO
+                    JungleClear();
+                    break;
+            }   
         }
 
         private static void Render_OnPresent()
@@ -276,7 +280,7 @@ namespace HeavenSeries
            
         }
 
-        private void Harass()
+        private void Mixed()
         {
             if (W.Ready)
             {
@@ -287,7 +291,7 @@ namespace HeavenSeries
             //find suitable ally for E that IS NOT NAMI
             if (Champions.Nami.MenuClass.harassemenu["usee"].Enabled)
             {
-                foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(E.Range) && !x.IsMe && x.IsAlly && !x.IsDead && Champions.Nami.MenuClass.comboemenu["useeon" + x.ChampionName.ToLower()].Enabled && !Player.IsRecalling() && x.CountEnemyHeroesInRange(x.AttackRange + 100) > 1))
+                foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(E.Range) && !x.IsMe && x.IsAlly && !x.IsDead && Champions.Nami.MenuClass.harassemenu["useeon" + x.ChampionName.ToLower()].Enabled && !Player.IsRecalling() && x.CountEnemyHeroesInRange(x.AttackRange + 100) >= 1))
                 {
                     if (Obj != null && E.Ready)
                     {
@@ -296,7 +300,7 @@ namespace HeavenSeries
 
                 }
                 //Then I guess settle for Nami.
-                if (E.Ready && Champions.Nami.MenuClass.harassemenu["useeon" + Player.ChampionName.ToLower()].Enabled && !Player.IsRecalling() && Player.CountEnemyHeroesInRange(Player.AttackRange + 100) > 1)
+                if (E.Ready && Champions.Nami.MenuClass.harassemenu["useeon" + Player.ChampionName.ToLower()].Enabled && !Player.IsRecalling() && Player.CountEnemyHeroesInRange(Player.AttackRange + 100) >= 1)
                 {
                     E.CastOnUnit(Player);
                 }
@@ -357,7 +361,7 @@ namespace HeavenSeries
                 {
                     var target = TargetSelector.GetTarget((W.Range * 2) - 100);
 
-                    if (target != null && Champions.Nami.MenuClass.harasswmenu["usewonbounce" + target.ChampionName.ToLower()].Enabled)
+                    if (target != null && Champions.Nami.MenuClass.combowmenu["usewonbounce" + target.ChampionName.ToLower()].Enabled)
                     {
                         if (Player.Distance(target) > W.Range) //find a bounce! Let's bounce!
                         {
