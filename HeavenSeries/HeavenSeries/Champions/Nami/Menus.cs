@@ -83,6 +83,9 @@ namespace HeavenSeries
                 Champions.Nami.MenuClass.miscmenu = new Menu("miscmenu", "Misc");
                 {
                     //Misc -> Support Mode
+                    Champions.Nami.MenuClass.miscmenu.Add(new MenuBool("autoheal", "Auto Heal"));
+                    Champions.Nami.MenuClass.miscmenu.Add(new MenuBool("autoqcc", "Auto Q CC'd Enemy"));
+                    Champions.Nami.MenuClass.miscmenu.Add(new MenuBool("antigapq", "Auto Q Gapcloser"));
                     Champions.Nami.MenuClass.miscmenu.Add(new MenuBool("supportmode", "Support Mode"));
                 }
                 Champions.Nami.MenuClass.Root.Add(Champions.Nami.MenuClass.miscmenu);

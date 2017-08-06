@@ -15,6 +15,7 @@ using Spell = Aimtec.SDK.Spell;
 using Aimtec.SDK.Prediction.Skillshots;
 using Aimtec.SDK.Util;
 using System.Collections.Generic;
+using Aimtec.SDK.Events;
 
 namespace HeavenSeries
 {
@@ -67,9 +68,10 @@ namespace HeavenSeries
 
             Render.OnPresent += Render_OnPresent;
             Game.OnUpdate += Game_OnUpdate;
+            //Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
             Orbwalker.PostAttack += Orbwalker_OnPostAttack;
             Orbwalker.PreAttack += Orbwalker_OnPreAttack;
-            //GameObject.OnCreate += Game_RangeAttackOnCreate; //For nami E. Missle implementation. Need SDK spells support.
+            Dash.HeroDashed += OnGapcloser;
 
 
             Console.WriteLine("HeavenSeries - " + Player.ChampionName + " loaded.");
@@ -85,8 +87,56 @@ namespace HeavenSeries
             }
         }
 
+        public void OnProcessSpellCast(Obj_AI_Base sender, Obj_AI_BaseMissileClientDataEventArgs args)
+        {
+ 
+        }
+
+        public void OnGapcloser(object sender, Dash.DashArgs args)
+        {
+            if (Player.IsDead)
+            {
+                return;
+            }
+
+            var gapSender = (Obj_AI_Hero)args.Unit;
+            if (gapSender == null || !gapSender.IsEnemy)
+            {
+                return;
+            }
+
+            /// <summary>
+            ///     The Anti-Gapcloser E.
+            /// </summary>
+            if (Q.Ready &&
+                Champions.Nami.MenuClass.miscmenu["antigapq"].Enabled)
+            {
+                var playerPos = Player.ServerPosition;
+                if (args.EndPos.Distance(playerPos) <= 200)
+                {
+                    var prediction = Q.GetPrediction(gapSender);
+                    Q.Cast(prediction.CastPosition);
+                }
+                else
+                {
+                    var bestAlly = GameObjects.AllyHeroes
+                        .Where(a =>
+                            a.IsValidTarget(Q.Range, true) &&
+                            args.EndPos.Distance(a.ServerPosition) <= 200)
+                        .OrderBy(o => o.Distance(args.EndPos))
+                        .FirstOrDefault();
+                    if (bestAlly != null)
+                    {
+                        var prediction = Q.GetPrediction(gapSender);
+                        Q.Cast(prediction.CastPosition);
+                    }
+                }
+            }
+        }
+
         private void Game_OnUpdate()
         {
+            var target = TargetSelector.GetTarget(Q.Range);
             if (Player.IsDead || MenuGUI.IsChatOpen())
             {
                 return;
@@ -106,6 +156,28 @@ namespace HeavenSeries
                     LaneClear(); //TODO
                     JungleClear();
                     break;
+            }
+
+            if (Champions.Nami.MenuClass.miscmenu["autoheal"].Enabled)
+            {
+                ChooseHeal();
+            }
+
+            if (Champions.Nami.MenuClass.miscmenu["autoqcc"].Enabled)
+            {
+                if (target != null && Q.Ready && target.IsInRange(Q.Range))
+                {
+                    if (target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Stun) 
+                        || target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Snare))
+                    {
+                        var prediction = Q.GetPrediction(target);
+                        if (prediction.HitChance >= HitChance.High)
+                        {
+                            //Use CastPosition for circular skillshots
+                            Q.Cast(prediction.CastPosition);
+                        }
+                    }
+                }
             }
         }
 
@@ -164,7 +236,7 @@ namespace HeavenSeries
             //find suitable ally for E that IS NOT NAMI
             if (Champions.Nami.MenuClass.comboemenu["usee"].Enabled)
             {
-                foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(E.Range) && !x.IsMe && x.IsAlly && !x.IsDead && Champions.Nami.MenuClass.comboemenu["useeon" + x.ChampionName.ToLower()].Enabled && !Player.IsRecalling() && x.CountEnemyHeroesInRange(x.AttackRange + 50) > 1))
+                foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(E.Range) && !x.IsMe && x.IsAlly && !x.IsDead && Champions.Nami.MenuClass.comboemenu["useeon" + x.ChampionName.ToLower()].Enabled && !Player.IsRecalling() && x.CountEnemyHeroesInRange(x.AttackRange + 50) >= 1))
                 {
                     if (Obj != null && E.Ready)
                     {
@@ -173,7 +245,7 @@ namespace HeavenSeries
 
                 }
                 //Then I guess settle for nami.
-                if (E.Ready && Champions.Nami.MenuClass.comboemenu["useeon" + Player.ChampionName.ToLower()].Enabled && !Player.IsRecalling() && Player.CountEnemyHeroesInRange(Player.AttackRange + 50) > 1)
+                if (E.Ready && Champions.Nami.MenuClass.comboemenu["useeon" + Player.ChampionName.ToLower()].Enabled && !Player.IsRecalling() && Player.CountEnemyHeroesInRange(Player.AttackRange + 50) >= 1)
                 {
                     E.CastOnUnit(Player);
                 }
@@ -251,12 +323,7 @@ namespace HeavenSeries
              }*/
 
             //ACTUALLY HEAL SQUISHY PRIORITY
-            var healTarget = ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(x => x.IsInRange(W.Range) && x.IsAlly && !x.IsDead && Champions.Nami.MenuClass.combowmenu["usewon" + x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Champions.Nami.MenuClass.combowmenu["usewon" + x.ChampionName.ToLower()].Value && !x.IsRecalling())
-                            .OrderBy(xe => xe.Health).ThenBy(x => x.MaxHealth).FirstOrDefault();
 
-            if (healTarget != null)
-                W.CastOnUnit(healTarget);
 
             if (IOrbwalker.Mode == OrbwalkingMode.Combo)
             {
@@ -311,7 +378,14 @@ namespace HeavenSeries
                 }
             }
 
-            
+            var healTarget = ObjectManager.Get<Obj_AI_Hero>()
+            .Where(x => x.IsInRange(W.Range) && x.IsAlly && !x.IsDead && Champions.Nami.MenuClass.combowmenu["usewon" + x.ChampionName.ToLower()].Enabled && x.HealthPercent() < Champions.Nami.MenuClass.combowmenu["usewon" + x.ChampionName.ToLower()].Value && !x.IsRecalling())
+                .OrderBy(xe => xe.Health).ThenBy(x => x.MaxHealth).FirstOrDefault();
+
+            if (healTarget != null)
+                W.CastOnUnit(healTarget);
+
+
         }
 
         private void JungleClear()
