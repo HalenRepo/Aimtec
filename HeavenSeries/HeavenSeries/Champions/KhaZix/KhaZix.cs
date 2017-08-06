@@ -215,7 +215,7 @@ namespace HeavenSeries
                         W.Cast(prediction.UnitPosition);
                 }
 
-                DelayAction.Queue(Game.Ping + 300, () =>
+                DelayAction.Queue(Game.Ping + 200, () =>
                 {
                     if (E.Ready && !isMidAir)
                     {
