@@ -51,13 +51,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Champions\Blitzcrank\Blitzcrank.cs" />
-    <Compile Include="Champions\Camille\Camille.cs" />
     <Compile Include="Champions\Elise\Elise.cs" />
     <Compile Include="Champions\Elise\MenuClass.cs" />
     <Compile Include="Champions\Elise\Menus.cs" />
     <Compile Include="Champions\Fizz\Fizz.cs" />
     <Compile Include="Champions\Fizz\MenuClass.cs" />
     <Compile Include="Champions\Fizz\Menus.cs" />
+    <Compile Include="Champions\Gnar\Gnar.cs" />
+    <Compile Include="Champions\Gnar\MenuClass.cs" />
+    <Compile Include="Champions\Gnar\Menus.cs" />
     <Compile Include="Champions\KhaZix\KhaZix.cs" />
     <Compile Include="Champions\KhaZix\MenuClass.cs" />
     <Compile Include="Champions\KhaZix\Menus.cs" />
@@ -70,10 +72,7 @@
     <Compile Include="Champions\Nidalee\MenuClass.cs" />
     <Compile Include="Champions\Nidalee\Menus.cs" />
     <Compile Include="Champions\Nidalee\Nidalee.cs" />
-    <Compile Include="Champions\RekSai\RekSai.cs" />
     <Compile Include="Champions\Soraka\Soraka.cs" />
-    <Compile Include="Champions\Thresh\MenuClass.cs" />
-    <Compile Include="Champions\Thresh\Menus.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -200,7 +200,7 @@ namespace HeavenSeries
             if (target == null || !target.IsValidTarget())
                 return;
 
-            if (Champions.KhaZix.MenuClass.assassinmenutargets[target.ChampionName.ToLower()].Enabled)
+            if (Champions.KhaZix.MenuClass.assassinmenutargets[target.ChampionName.ToLower()].Enabled && Champions.KhaZix.MenuClass.combomenu["usee"].Enabled && Champions.KhaZix.MenuClass.combomenu["useq"].Enabled)
             {
                 //Console.WriteLine(Game.ClockTime + " assassin combo");
                 //Look for reset!
