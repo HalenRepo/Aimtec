@@ -439,7 +439,7 @@ namespace HeavenSeries
                     (CQ != 0 || Player.SpellBook.CanUseSpell(catQ.Slot) == false) && (CE != 0 || Player.SpellBook.CanUseSpell(E.Slot) == false))
                 {
                     if ((HQ == 0 || HE == 0 && Player.HealthPercent() <= Champions.Nidalee.MenuClass.miscmenu["healhealthreq"].Value && 
-                        Champions.Nidalee.MenuClass.junglehumanmenu["usee"].Enabled) && R.Ready && Champions.Nidalee.MenuClass.junglemenu["user"].Enabled)
+                        Champions.Nidalee.MenuClass.junglehumanmenu["usee"].Enabled && Player.ManaPercent() >= Champions.Nidalee.MenuClass.junglehumanmenu["usee"].Value) && R.Ready && Champions.Nidalee.MenuClass.junglemenu["user"].Enabled)
                     {
                         if (Player.ManaPercent() >= Champions.Nidalee.MenuClass.miscmenu["healmanareq"].Value)
                         {
@@ -453,7 +453,7 @@ namespace HeavenSeries
             {
                 if (/*CHECK FOR MANA REQ FOR JUNGLE Q*/ HQ == 0 || Player.HasBuff("crestoftheancientgolem") && HQ == 0)
                 {
-                    if (Champions.Nidalee.MenuClass.junglehumanmenu["useq"].Enabled)
+                    if (Champions.Nidalee.MenuClass.junglehumanmenu["useq"].Enabled && Player.ManaPercent() >= Champions.Nidalee.MenuClass.junglehumanmenu["useq"].Value)
                     {
                         var prediction = Q.GetPrediction(m);
                         if (prediction.HitChance >= HitChance.Low)
@@ -466,7 +466,7 @@ namespace HeavenSeries
                     if (/*CHECK FOR MANA REQ FOR JUNGLE W*/
                          HW == 0 || Player.HasBuff("crestoftheancientgolem") && HQ == 0)
                     {
-                        if (Champions.Nidalee.MenuClass.junglehumanmenu["usew"].Enabled)
+                        if (Champions.Nidalee.MenuClass.junglehumanmenu["usew"].Enabled && Player.ManaPercent() >= Champions.Nidalee.MenuClass.junglehumanmenu["usew"].Value)
                             W.Cast(m.ServerPosition);
                     }
                 }
