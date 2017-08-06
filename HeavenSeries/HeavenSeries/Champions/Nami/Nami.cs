@@ -282,7 +282,7 @@ namespace HeavenSeries
 
         private void Mixed()
         {
-            if (W.Ready)
+            if (W.Ready && Player.ManaPercent() >= Champions.Nami.MenuClass.harasswmenu["usewmana"].Value)
             {
                 ChooseHeal();
             }
@@ -293,14 +293,14 @@ namespace HeavenSeries
             {
                 foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsInRange(E.Range) && !x.IsMe && x.IsAlly && !x.IsDead && Champions.Nami.MenuClass.harassemenu["useeon" + x.ChampionName.ToLower()].Enabled && !Player.IsRecalling() && x.CountEnemyHeroesInRange(x.AttackRange + 100) >= 1))
                 {
-                    if (Obj != null && E.Ready)
+                    if (Obj != null && E.Ready && Player.ManaPercent() >= Champions.Nami.MenuClass.harassemenu["useemana"].Value)
                     {
                         E.CastOnUnit(Obj);
                     }
 
                 }
                 //Then I guess settle for Nami.
-                if (E.Ready && Champions.Nami.MenuClass.harassemenu["useeon" + Player.ChampionName.ToLower()].Enabled && !Player.IsRecalling() && Player.CountEnemyHeroesInRange(Player.AttackRange + 100) >= 1)
+                if (E.Ready && Player.ManaPercent() >= Champions.Nami.MenuClass.harassemenu["useemana"].Value && Champions.Nami.MenuClass.harassemenu["useeon" + Player.ChampionName.ToLower()].Enabled && !Player.IsRecalling() && Player.CountEnemyHeroesInRange(Player.AttackRange + 100) >= 1)
                 {
                     E.CastOnUnit(Player);
                 }

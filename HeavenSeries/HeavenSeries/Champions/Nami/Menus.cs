@@ -67,6 +67,7 @@ namespace HeavenSeries
                     Champions.Nami.MenuClass.harasswmenu = new Menu("harasswmenu", "W");
                     {
                         Champions.Nami.MenuClass.harasswmenu.Add(new MenuBool("usew", "Use W"));
+                        Champions.Nami.MenuClass.harasswmenu.Add(new MenuSlider("usewmana", "Use W if Mana >= x%", 25, 1, 100));
                     }
                     Champions.Nami.MenuClass.harassmenu.Add(Champions.Nami.MenuClass.harasswmenu);
 
@@ -74,6 +75,7 @@ namespace HeavenSeries
                     Champions.Nami.MenuClass.harassemenu = new Menu("harassemenu", "E");
                     {
                         Champions.Nami.MenuClass.harassemenu.Add(new MenuBool("usee", "Use E"));
+                        Champions.Fizz.MenuClass.harassemenu.Add(new MenuSlider("useemana", "Use E if Mana >= x%", 25, 1, 100));
                     }
                     Champions.Nami.MenuClass.harassmenu.Add(Champions.Nami.MenuClass.harassemenu);
                 }
