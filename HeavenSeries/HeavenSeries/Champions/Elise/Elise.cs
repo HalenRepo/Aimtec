@@ -44,12 +44,11 @@ namespace HeavenSeries
             E.SetSkillshot(0.25f, 55f, 1600, true, SkillshotType.Line);
 
             Menus();
-            MenuClass.combomenu.Add(new MenuSeperator("sepElise", "Use Human E (Cocoon) on: "));
-            foreach (Obj_AI_Hero enemies in GameObjects.EnemyHeroes)
-                MenuClass.combomenu.Add(new MenuBool("useeon" + enemies.ChampionName.ToLower(), enemies.ChampionName));
+            
 
             Render.OnPresent += Render_OnPresent;
             Game.OnUpdate += Game_OnUpdate;
+            Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
             Orbwalker.PostAttack += Orbwalker_OnPostAttack;
             Orbwalker.PreAttack += Orbwalker_OnPreAttack;
 
@@ -64,6 +63,9 @@ namespace HeavenSeries
                 return;
             }
 
+            /*var buffs = ObjectManager.GetLocalPlayer().Buffs.Select(buff => buff.Name).ToList();
+            Console.WriteLine(string.Join(Environment.NewLine, buffs));*/
+
             CheckForm();
 
             switch (Orbwalker.Mode)
@@ -76,6 +78,22 @@ namespace HeavenSeries
                     LaneClear(); //TODO
                     JungleClear();
                     break;
+            }
+        }
+
+        public void OnProcessSpellCast(Obj_AI_Base sender, Obj_AI_BaseMissileClientDataEventArgs args)
+        {
+            if (!sender.IsMe)
+                return;
+            //if changing from spider to human
+            if (args.SpellData.Name.ToLower() == "eliserspider")
+            {
+                //if player still has attack speed steriod from spider W
+                if (Player.HasBuff("EliseSpiderW"))
+                {
+                    Console.WriteLine("stop");
+                    return;
+                }
             }
         }
 
@@ -118,103 +136,81 @@ namespace HeavenSeries
 
         private void Combo()
         {
-            var target = TargetSelector.GetTarget(W.Range);
-
-            if (target == null)
-                return;
-
-            //Human
             if (HumanForm)
             {
-                if (target.IsInRange(E.Range) && MenuClass.combohumanmenu["humane"].Enabled && MenuClass.combomenu["useeon" + target.ChampionName.ToLower()].Enabled) //DO MENU CHECKS HERE
+                if (E.Ready && Champions.Elise.MenuClass.combohumanmenu["humane"].Enabled)
                 {
-                    var prediction = E.GetPrediction(target);
-                    //Draw prediction
-                    if (MenuClass.drawmenu["drawPrediction"].Enabled)
+                    foreach (Obj_AI_Hero target in GameObjects.EnemyHeroes.Where(x => !x.IsDead && x.IsValidTarget(E.Range)))
                     {
-                        Render.WorldToScreen(Player.Position, out Vector2 playerScreenPos);
-                        Color lineColour;
-                        switch (prediction.HitChance)
+                        var prediction = E.GetPrediction(target);
+                        if (E.Ready && Champions.Elise.MenuClass.combomenuwhitelist["useeon" + target.ChampionName.ToLower()].Enabled && prediction.HitChance >= HitChance.High)
                         {
-                            case HitChance.Collision:
-                                lineColour = Color.Red;
-                                break;
-
-                            case HitChance.Impossible:
-                                lineColour = Color.Orange;
-                                break;
-
-                            case HitChance.Medium:
-                                lineColour = Color.Orange;
-                                break;
-
-                            case HitChance.High:
-                                lineColour = Color.LightGreen;
-                                break;
-
-                            default:
-                                lineColour = Color.Red;
-                                return;
+                            E.Cast(prediction.UnitPosition);
                         }
-
-                        Render.WorldToScreen(prediction.UnitPosition, out Vector2 predictionSreenPos);
-                        Render.Line(playerScreenPos, predictionSreenPos, lineColour);
-
                     }
-
-
-
-                    if (prediction.HitChance >= HitChance.High)
-                        E.Cast(prediction.UnitPosition);
                 }
 
-                if (target.IsInRange(Q.Range) && MenuClass.combohumanmenu["humanq"].Enabled)
+                if (Q.Ready && Champions.Elise.MenuClass.combohumanmenu["humanq"].Enabled)
                 {
-                    Q.Cast(target);
+                    foreach (Obj_AI_Hero target in GameObjects.EnemyHeroes.Where(x => !x.IsDead && x.IsValidTarget(Q.Range)))
+                    {
+                        Q.Cast(target);
+                    }
                 }
-                   
-                
-                if (target.IsInRange(W.Range) && MenuClass.combohumanmenu["humanw"].Enabled)
-                    W.Cast(target);
 
-                //750 = Spider E range
-                if (!Q.Ready && !W.Ready && Player.Distance(target) <= 750 && MenuClass.combomenu["autor"].Enabled)//CHECK USE R
+                if (W.Ready && Champions.Elise.MenuClass.combohumanmenu["humanw"].Enabled)
                 {
-                    R.Cast();
+                    foreach (Obj_AI_Hero target in GameObjects.EnemyHeroes.Where(x => !x.IsDead && x.IsValidTarget(Player.AttackRange)))
+                    {
+                        W.Cast(target);
+                    }
                 }
 
-                if (!Q.Ready && !W.Ready && Player.Distance(target) <= 750 && MenuClass.combomenu["autor"].Enabled)
+                if (!Q.Ready && !W.Ready && !E.Ready && R.Ready && Champions.Elise.MenuClass.combomenu["autor"].Enabled)
                 {
                     R.Cast();
                 }
-                   
             }
 
             if (SpiderForm)
             {
-                if (target.IsInRange(QS.Range) && MenuClass.combospidermenu["spiderq"].Enabled) //DO MENU CHECKS HERE
-                    QS.Cast(target);
+                if (WS.Ready && Champions.Elise.MenuClass.combospidermenu["spiderw"].Enabled)
+                {
+                    foreach (Obj_AI_Hero target in GameObjects.EnemyHeroes.Where(x => !x.IsDead && x.IsValidTarget(QS.Range)))
+                    {
+                        WS.Cast();
+                    }
+                }
 
-                if (target.IsInRange(Player.AttackRange) && MenuClass.combospidermenu["spiderw"].Enabled)
-                    WS.Cast(target);
+                if (QS.Ready && Champions.Elise.MenuClass.combospidermenu["spiderq"].Enabled)
+                {
+                    foreach (Obj_AI_Hero target in GameObjects.EnemyHeroes.Where(x => !x.IsDead && x.IsValidTarget(QS.Range)))
+                    {
+                        QS.Cast(target);
+                    }
+                }
 
-                if (target.IsInRange(ES.Range) && Player.Distance(target) > QS.Range && MenuClass.combospidermenu["spidere"].Enabled)
-                    ES.Cast(target);
+                if (ES.Ready && Champions.Elise.MenuClass.combospidermenu["spidere"].Enabled)
+                {
+                    foreach (var target in GameObjects.EnemyHeroes.Where(x => x.IsValidTarget(E.Range)))
+                    {
+                        if (Player.Distance(target) <= ES.Range && Player.Distance(target) > QS.Range &&
+                        Champions.Elise.MenuClass.combospidermenu["spidere"].Enabled && ES.Ready)
+                        {
+                            E.Cast(target);
+                        }
+                        if (Player.Distance(target) <= ES.Range && Player.Distance(target) > QS.Range &&
+                        Champions.Elise.MenuClass.combospidermenu["spidere"].Enabled && ES.Ready && Player.CountAllyHeroesInRange(E.Range) == 1 && target.HealthPercent() < 5)
+                        {
+                            E.Cast(target);
+                        }
+                    }
+                }
 
-                if (Player.Distance(target) > QS.Range && MenuClass.combomenu["autor"].Enabled && !ES.Ready && R.Ready && Player.Distance(target) <= 1075) //CHECK USE R
-                    R.Cast();
-
-                if (!QS.Ready && Player.Distance(target) >= 125 && MenuClass.combomenu["autor"].Enabled && !ES.Ready && R.Ready && Player.Distance(target) <= 1075)
-                    R.Cast();
-
-                if (ES.Ready && Player.Distance(target) > QS.Range && MenuClass.combospidermenu["spidere"].Enabled)
-                    ES.Cast(target);
-
-                if (MenuClass.combomenu["autor"].Enabled && !QS.Ready && WS.Ready)
+                if (!QS.Ready && !WS.Ready && R.Ready && Champions.Elise.MenuClass.combomenu["autor"].Enabled)
                 {
                     R.Cast();
                 }
-
             }
 
         }
@@ -223,7 +219,7 @@ namespace HeavenSeries
         {
             //Get jungle minions
             var minions = ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsInRange(Player.AttackRange) && x.IsEnemy && x.IsValidSpellTarget() && !x.UnitSkinName.ToLower().Contains("minion"));
-            var target = minions.FirstOrDefault(x => x.IsInRange(Player.AttackRange));
+            var target = minions.FirstOrDefault(x => x.IsInRange(Player.AttackRange + 100));
             
             if (minions == null)
                 return;
@@ -231,54 +227,63 @@ namespace HeavenSeries
             {
                 if (HumanForm)
                 {
-                    if (Q.Ready && MenuClass.junglehumanmenu["humanq"].Enabled && minion.IsValidTarget() && minion.IsInRange(Q.Range))
+                    if (Q.Ready && Champions.Elise.MenuClass.junglehumanmenu["humanq"].Enabled && Champions.Elise.MenuClass.junglehumanmenu["humanq"].Value < Player.ManaPercent())
                     {
-                        if (minion.Health <= Player.GetAutoAttackDamage(minion))
-                        {
-                            return;
-                        }
                         Q.Cast(minion);
                     }
-                        
 
-                    if (W.Ready && MenuClass.junglehumanmenu["humanw"].Enabled && minion.IsValidTarget() && minion.IsInRange(W.Range))
+                    if (W.Ready && Champions.Elise.MenuClass.junglehumanmenu["humanw"].Enabled && Champions.Elise.MenuClass.junglehumanmenu["humanw"].Value < Player.ManaPercent())
                     {
-                        if (minion.Health <= Player.GetAutoAttackDamage(minion) || minion.Health <= 25)
-                        {
-                            return;
-                        }
                         W.Cast(minion);
                     }
-                        
 
-                    if (R.Ready && !Q.Ready && !W.Ready && MenuClass.junglemenu["autor"].Enabled)
+                    //If q isn't ready, out of mana for q, or q is not enabled in menu for jungle AND if w isn't ready, out of mana for w, or w is not enabled in menu for jungle = SWITCH
+                    if (Champions.Elise.MenuClass.junglemenu["autor"].Enabled && (!Q.Ready || Champions.Elise.MenuClass.junglehumanmenu["humanq"].Value >= Player.ManaPercent() || !Champions.Elise.MenuClass.junglehumanmenu["humanq"].Enabled) && (!W.Ready || Champions.Elise.MenuClass.junglehumanmenu["humanw"].Value >= Player.ManaPercent() || !Champions.Elise.MenuClass.junglehumanmenu["humanw"].Enabled) )
+                    {
                         R.Cast();
+                    }
                 }
 
-                if (!HumanForm)
+                if (SpiderForm)
                 {
-                    if (QS.Ready && MenuClass.junglespidermenu["spiderq"].Enabled && minion.IsValidTarget() && minion.IsInRange(QS.Range))
+                    if (WS.Ready && Champions.Elise.MenuClass.junglespidermenu["spiderw"].Enabled)
                     {
-                        QS.Cast(minion);
-                    }
-                        
-
-                    if (WS.Ready && MenuClass.junglespidermenu["spiderw"].Enabled && minion.IsValidTarget() && minion.IsInRange(Player.AttackRange))
-                    {
-                        //Console.WriteLine(Game.ClockTime + " casting spider w");
                         WS.Cast();
                     }
 
-                    if (R.Ready && !WS.Ready)
+                    if (Q.Ready && Champions.Elise.MenuClass.junglespidermenu["spiderq"].Enabled)
                     {
-                        if (!WS.Ready && target.IsInRange(Player.AttackRange) && Player.HasBuffOfType(BuffType.Haste) && MenuClass.junglespidermenu["spiderw"].Enabled)
-                        {
-                            //Delay transform if W attack speed steriod was used
-                            DelayAction.Queue(Game.Ping + 2500, () => R.Cast());
-                        }
+                        QS.Cast(minion);
+                    }
+
+                    //if q isn't ready, or not enabled in menu AND if w isn't ready, or not enabled in menu THEN switch
+                    if (Champions.Elise.MenuClass.junglemenu["autor"].Enabled && (!QS.Ready || !Champions.Elise.MenuClass.junglespidermenu["spiderq"].Enabled) && (!WS.Ready || !Champions.Elise.MenuClass.junglespidermenu["spiderw"].Enabled))
+                    {
                         R.Cast();
                     }
-                        
+                }
+
+                if (Champions.Elise.MenuClass.junglemenu["junglesteal"].Enabled)
+                {
+                    if (minion.UnitSkinName.Contains("SRU_Dragon") || minion.UnitSkinName.Contains("SRU_Baron") || minion.UnitSkinName.Contains("SRU_Red") 
+                        || minion.UnitSkinName.Contains("SRU_Blue"))
+                    {
+                        if (SpiderForm)
+                        {
+                            if (QS.Ready && Player.GetSpellDamage(minion, SpellSlot.Q) >= minion.Health)
+                            {
+                                QS.Cast(minion);
+                            }
+                        }
+
+                        if (HumanForm)
+                        {
+                            if (Q.Ready && Player.GetSpellDamage(minion, SpellSlot.Q) >= minion.Health)
+                            {
+                                Q.Cast(minion);
+                            }
+                        }
+                    }
                 }
             }
         }

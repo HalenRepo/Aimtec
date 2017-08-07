@@ -4,6 +4,8 @@
 
     using Aimtec.SDK.Menu;
     using Aimtec.SDK.Menu.Components;
+    using Aimtec;
+    using Aimtec.SDK.Util.Cache;
 
     /// <summary>
     ///     The menu class.
@@ -18,68 +20,76 @@
             /// <summary>
             ///     Loads the root Menu.
             /// </summary>
-            MenuClass.Root = new Menu("HeavenSeries", "HeavenSeries - Elise", true);
+            Champions.Elise.MenuClass.Root = new Menu("HeavenSeries", "HeavenSeries - Elise", true);
             {
-                Orbwalker.Attach(MenuClass.Root);
+                Orbwalker.Attach(Champions.Elise.MenuClass.Root);
 
-                MenuClass.combomenu = new Menu("combo", "Combo");
+                Champions.Elise.MenuClass.combomenu = new Menu("combo", "Combo");
                 {
-                    MenuClass.combohumanmenu = new Menu("human", "Human");
+                    Champions.Elise.MenuClass.combohumanmenu = new Menu("human", "Human");
                     {
-                        MenuClass.combohumanmenu.Add(new MenuBool("humanq", "Use Q"));
-                        MenuClass.combohumanmenu.Add(new MenuBool("humanw", "Use W"));
-                        MenuClass.combohumanmenu.Add(new MenuBool("humane", "Use E"));
+                        Champions.Elise.MenuClass.combohumanmenu.Add(new MenuBool("humanq", "Use Q"));
+                        Champions.Elise.MenuClass.combohumanmenu.Add(new MenuBool("humanw", "Use W"));
+                        Champions.Elise.MenuClass.combohumanmenu.Add(new MenuBool("humane", "Use E"));
                     }
-                    MenuClass.combomenu.Add(MenuClass.combohumanmenu);
+                    Champions.Elise.MenuClass.combomenu.Add(Champions.Elise.MenuClass.combohumanmenu);
 
-                    MenuClass.combospidermenu = new Menu("spider", "Spider");
+                    Champions.Elise.MenuClass.combospidermenu = new Menu("spider", "Spider");
                     {
-                        MenuClass.combospidermenu.Add(new MenuBool("spiderq", "Use Q"));
-                        MenuClass.combospidermenu.Add(new MenuBool("spiderw", "Use W"));
-                        MenuClass.combospidermenu.Add(new MenuBool("spidere", "Use E"));
+                        Champions.Elise.MenuClass.combospidermenu.Add(new MenuBool("spiderq", "Use Q"));
+                        Champions.Elise.MenuClass.combospidermenu.Add(new MenuBool("spiderw", "Use W"));
+                        Champions.Elise.MenuClass.combospidermenu.Add(new MenuBool("spidere", "Use E"));
                     }
-                    MenuClass.combomenu.Add(MenuClass.combospidermenu);
+                    Champions.Elise.MenuClass.combomenu.Add(Champions.Elise.MenuClass.combospidermenu);
 
-                    MenuClass.combomenu.Add(new MenuBool("autor", "Auto R"));
+                    Champions.Elise.MenuClass.combomenuwhitelist = new Menu("whitelist", "E Whitelist");
+                    {
+                        foreach (Obj_AI_Hero enemies in GameObjects.EnemyHeroes)
+                            Champions.Elise.MenuClass.combomenuwhitelist.Add(new MenuBool("useeon" + enemies.ChampionName.ToLower(), enemies.ChampionName));
+                    }
+                    Champions.Elise.MenuClass.combomenu.Add(Champions.Elise.MenuClass.combomenuwhitelist);
+
+                    Champions.Elise.MenuClass.combomenu.Add(new MenuBool("autor", "Auto R"));
 
                 }
-                MenuClass.Root.Add(MenuClass.combomenu);
+                Champions.Elise.MenuClass.Root.Add(Champions.Elise.MenuClass.combomenu);
 
                 /// <summary>
                 ///     Sets the menu for the drawings.
                 /// </summary>
-                MenuClass.junglemenu = new Menu("jungle", "Jungle");
+                Champions.Elise.MenuClass.junglemenu = new Menu("jungle", "Jungle");
                 {
-                    MenuClass.junglehumanmenu = new Menu("human", "Human");
+                    Champions.Elise.MenuClass.junglehumanmenu = new Menu("human", "Human");
                     {
-                        MenuClass.junglehumanmenu.Add(new MenuBool("humanq", "Use Q"));
-                        MenuClass.junglehumanmenu.Add(new MenuBool("humanw", "Use W"));
+                        Champions.Elise.MenuClass.junglehumanmenu.Add(new MenuSliderBool("humanq", "Use Human Q if mana % >=", true, 25, 1, 100));
+                        Champions.Elise.MenuClass.junglehumanmenu.Add(new MenuSliderBool("humanw", "Use Human W if mana % >=", true, 25, 1, 100));
                     }
-                    MenuClass.junglemenu.Add(MenuClass.junglehumanmenu);
+                    Champions.Elise.MenuClass.junglemenu.Add(Champions.Elise.MenuClass.junglehumanmenu);
 
-                    MenuClass.junglespidermenu = new Menu("spider", "Spider");
+                    Champions.Elise.MenuClass.junglespidermenu = new Menu("spider", "Spider");
                     {
-                        MenuClass.junglespidermenu.Add(new MenuBool("spiderq", "Use Q"));
-                        MenuClass.junglespidermenu.Add(new MenuBool("spiderw", "Use W"));
+                        Champions.Elise.MenuClass.junglespidermenu.Add(new MenuBool("spiderq", "Use Q"));
+                        Champions.Elise.MenuClass.junglespidermenu.Add(new MenuBool("spiderw", "Use W"));
                     }
-                    MenuClass.junglemenu.Add(MenuClass.junglespidermenu);
+                    Champions.Elise.MenuClass.junglemenu.Add(Champions.Elise.MenuClass.junglespidermenu);
 
-                    MenuClass.junglemenu.Add(new MenuBool("autor", "Auto R"));
+                    Champions.Elise.MenuClass.junglemenu.Add(new MenuBool("autor", "Auto R"));
+                    Champions.Elise.MenuClass.junglemenu.Add(new MenuBool("junglesteal", "Jungle Steal"));
                     //MenuClass.junglemenu.Add(new MenuSliderBool("stayspider", "Stay as Spider when Mana below x%", true, 30, 1, 99));
                 }
-                MenuClass.Root.Add(MenuClass.junglemenu);
+                Champions.Elise.MenuClass.Root.Add(Champions.Elise.MenuClass.junglemenu);
 
-                MenuClass.drawmenu = new Menu("draw", "Drawings");
+                Champions.Elise.MenuClass.drawmenu = new Menu("draw", "Drawings");
                 {
-                    MenuClass.drawmenu.Add(new MenuBool("drawq", "Draw Q", false));
-                    MenuClass.drawmenu.Add(new MenuBool("draww", "Draw W", false));
-                    MenuClass.drawmenu.Add(new MenuBool("drawe", "Draw E"));
-                    MenuClass.drawmenu.Add(new MenuBool("drawPrediction", "Draw E Prediction"));
+                    Champions.Elise.MenuClass.drawmenu.Add(new MenuBool("drawq", "Draw Q", false));
+                    Champions.Elise.MenuClass.drawmenu.Add(new MenuBool("draww", "Draw W", false));
+                    Champions.Elise.MenuClass.drawmenu.Add(new MenuBool("drawe", "Draw E"));
+                    //MenuClass.drawmenu.Add(new MenuBool("drawPrediction", "Draw E Prediction"));
                 }
-                MenuClass.Root.Add(MenuClass.drawmenu);
+                Champions.Elise.MenuClass.Root.Add(Champions.Elise.MenuClass.drawmenu);
 
             }
-            MenuClass.Root.Attach();
+            Champions.Elise.MenuClass.Root.Attach();
         }
 
     }

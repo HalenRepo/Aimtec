@@ -1,4 +1,4 @@
-﻿namespace HeavenSeries
+﻿namespace HeavenSeries.Champions.Elise
 {
     using Aimtec.SDK.Menu;
 
@@ -19,6 +19,8 @@
         ///     Gets or sets the combo menu.
         /// </summary>
         public static Menu combomenu { get; set; }
+
+        public static Menu combomenuwhitelist { get; set; }
 
         /// <summary>
         ///     Gets or sets the combohumanmenu menu.
