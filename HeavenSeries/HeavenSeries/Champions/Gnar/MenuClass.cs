@@ -26,35 +26,23 @@ namespace HeavenSeries.Champions.Gnar
         /// </summary>
         public static Menu combomenu { get; set; }
 
-        /// <summary>
-        ///     Gets or sets the combohumanmenu menu.
-        /// </summary>
-        public static Menu comboqmenu { get; set; }
+        public static Menu combominimenu { get; set; }
 
-        public static Menu comboemenu { get; set; }
+        public static Menu combomegamenu { get; set; }
 
-        /// <summary>
-        ///     Gets or sets the itemsmenu menu.
-        /// </summary>
-        public static Menu combowmenu { get; set; }
-
-        public static Menu combormenu { get; set; }
-
-        public static Menu comboronmenu { get; set; }
+        public static Menu comborwhitelist { get; set; }
 
         public static Menu harassmenu { get; set; }
 
-        public static Menu harassqmenu { get; set; }
+        public static Menu harassminimenu { get; set; }
 
-        public static Menu harasswmenu { get; set; }
+        public static Menu harassmegamenu { get; set; }
 
-        public static Menu harassemenu { get; set; }
+        public static Menu laneclearmenu { get; set; }
 
-        public static Menu miscmenu { get; set; }
+        public static Menu laneclearminimenu { get; set; }
 
-        public static Menu miscoptionsmenu { get; set; }
-
-        public static Menu killstealmenu { get; set; }
+        public static Menu laneclearmegamenu { get; set; }
 
         public static Menu drawmenu { get; set; }
 

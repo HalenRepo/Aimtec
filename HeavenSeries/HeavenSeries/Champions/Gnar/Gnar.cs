@@ -1,20 +1,16 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
-
 using Aimtec;
-using Aimtec.SDK.Damage;
 using Aimtec.SDK.Extensions;
-using Aimtec.SDK.Menu;
-using Aimtec.SDK.Menu.Components;
 using Aimtec.SDK.Orbwalking;
 using Aimtec.SDK.TargetSelector;
 using Aimtec.SDK.Util.Cache;
 
 using Spell = Aimtec.SDK.Spell;
 using Aimtec.SDK.Prediction.Skillshots;
-using Aimtec.SDK.Util;
 using System.Collections.Generic;
+using System.Linq;
+using Aimtec.SDK.Damage;
 
 namespace HeavenSeries
 {
@@ -23,22 +19,34 @@ namespace HeavenSeries
         public static Orbwalker Orbwalker = new Orbwalker();
         public static Obj_AI_Hero Player => ObjectManager.GetLocalPlayer();
 
-        //CHECK ALL THESE VALUES
-        public static Spell Q = new Spell(SpellSlot.Q, 550);
-        public static Spell W = new Spell(SpellSlot.W, Player.AttackRange);
-        public static Spell E = new Spell(SpellSlot.E, 400);
-        public static Spell R = new Spell(SpellSlot.R, 1300);
+        public static Spell Q = new Spell(SpellSlot.Q, 1100);
+        public static Spell W = new Spell(SpellSlot.W);
+        public static Spell E = new Spell(SpellSlot.E, 475);
+
+        public static Spell Qmega = new Spell(SpellSlot.Q, 1100);
+        public static Spell Wmega = new Spell(SpellSlot.W, 525);
+        public static Spell Emega = new Spell(SpellSlot.E, 475);
+
+        public static Spell R = new Spell(SpellSlot.R, 420);
+
+        public static bool mini;
 
         public static IOrbwalker IOrbwalker = Orbwalker.Implementation;
         public Gnar()
         {
-            E.SetSkillshot(0.25f, 400, 1300, false, SkillshotType.Circle);
-            R.SetSkillshot(0.25f, 80, 1200, false, SkillshotType.Line);
+            Q.SetSkillshot(0.25f, 60, 1200, true, SkillshotType.Line);
+            E.SetSkillshot(0.5f, 150, float.MaxValue, false, SkillshotType.Circle);
+            // Mega
+            Qmega.SetSkillshot(0.25f, 80, 1200, true, SkillshotType.Line);
+            Wmega.SetSkillshot(0.25f, 80, float.MaxValue, false, SkillshotType.Line);
+            Emega.SetSkillshot(0.5f, 150, float.MaxValue, false, SkillshotType.Circle);
+
+            R.SetSkillshot(0.25f, 500, 1200, false, SkillshotType.Circle);
 
             Menus();
 
-            foreach (Obj_AI_Hero enemies in GameObjects.EnemyHeroes)
-                Champions.Gnar.MenuClass.comboronmenu.Add(new MenuBool("useron" + enemies.ChampionName.ToLower(), enemies.ChampionName));
+            /*foreach (Obj_AI_Hero enemies in GameObjects.EnemyHeroes)
+                Champions.Gnar.MenuClass.comboronmenu.Add(new MenuBool("useron" + enemies.ChampionName.ToLower(), enemies.ChampionName));*/
 
             Render.OnPresent += Render_OnPresent;
             Game.OnUpdate += Game_OnUpdate;
@@ -55,6 +63,8 @@ namespace HeavenSeries
             {
                 return;
             }
+
+            CheckForm();
 
             var target = TargetSelector.GetTarget(Q.Range);
 
@@ -75,6 +85,22 @@ namespace HeavenSeries
             }
         }
 
+        private void CheckForm()
+        {
+
+            /*var buffs = ObjectManager.GetLocalPlayer().Buffs.Select(buff => buff.Name).ToList();
+Console.WriteLine(string.Join(Environment.NewLine, buffs));*/
+
+            if (Player.SpellBook.GetSpell(SpellSlot.Q).Name.ToLower() == "gnarq")
+            {
+                mini = true;
+            }
+            else
+            {
+                mini = false;
+            }
+        }
+
         private static void Render_OnPresent()
         {
             if (Champions.Gnar.MenuClass.drawmenu["drawq"].Enabled)
@@ -88,6 +114,8 @@ namespace HeavenSeries
 
             if (Champions.Gnar.MenuClass.drawmenu["drawr"].Enabled)
                 Render.Circle(Player.Position, R.Range, 30, Color.White);
+
+            //Render.Circle(Player.Position, 700, 30, Color.Red);
 
         }
         public static void Orbwalker_OnPostAttack(Object sender, PostAttackEventArgs args)
@@ -106,143 +134,138 @@ namespace HeavenSeries
 
         public void OnProcessSpellCast(Obj_AI_Base sender, Obj_AI_BaseMissileClientDataEventArgs args)
         {
-            if (sender is Obj_AI_Turret && args.Target.IsMe && E.Ready && Champions.Gnar.MenuClass.miscoptionsmenu["UseETower"].Enabled)
-            {
-                E.Cast(Game.CursorPos);
-            }
-
             if (!sender.IsMe)
             {
                 return;
             }
-
-            if (args.SpellData.Name == "GnarQ")
-            {
-                if (IOrbwalker.Mode == OrbwalkingMode.Combo)
-                {
-                    DelayAction.Queue((int)(sender.SpellBook.CastEndTime - Game.ClockTime) + Game.Ping / 2 + 250, () => W.Cast());
-                }
-
-                if (IOrbwalker.Mode == OrbwalkingMode.Mixed && E.Ready)
-                {
-                    //THEN HARASS. SET LAST POSITION BEFORE CASTING.
-                    LastHarassPos = Player.ServerPosition;
-                }
-            }
-
-            if (args.SpellData.Name == "GnarETwo" || args.SpellData.Name == "GnarEBuffer")
-            {
-                //Get rid of last pos since we are landing now. For next harass.
-                LastHarassPos = null;
-            }
-
         }
 
-        private static Vector3? LastHarassPos { get; set; }
-
-        //For Gnar E
-
-        private static float DamageToUnit(Obj_AI_Hero target)
+        public static List<Obj_AI_Minion> GetEnemyLaneMinionsTargets()
         {
-            var damage = 0d;
-            if (Q.Ready)
-                damage += Player.GetSpellDamage(target, SpellSlot.Q);
-
-            //We might want to check if this is actually more than 0
-            if (W.Ready)
-                damage += Player.GetSpellDamage(target, SpellSlot.W);
-
-            if (E.Ready)
-                damage += Player.GetSpellDamage(target, SpellSlot.E);
-
-            if (R.Ready)
-                damage += Player.GetSpellDamage(target, SpellSlot.R);
-
-            damage += Player.GetAutoAttackDamage(target); //add auto attack
-
-            return (float)damage;
+            return GetEnemyLaneMinionsTargetsInRange(float.MaxValue);
         }
 
-        public static bool CanKillWithUltCombo(Obj_AI_Hero target)
+        /// <summary>
+        ///     Gets the valid lane minions targets in the game inside a determined range.
+        /// </summary>
+        public static List<Obj_AI_Minion> GetEnemyLaneMinionsTargetsInRange(float range)
         {
-            return Player.GetSpellDamage(target, SpellSlot.Q) + Player.GetSpellDamage(target, SpellSlot.W) + Player.GetSpellDamage(target, SpellSlot.R) >
-                   target.Health;
-        }
-
-        //Extend the Gnar ult for better accuracy
-        public static void CastRSmart(Obj_AI_Hero target)
-        {
-            var castPosition = R.GetPrediction(target).UnitPosition;
-            castPosition = Player.ServerPosition.Extend(castPosition, R.Range);
-
-            R.Cast(castPosition);
+            return GameObjects.EnemyMinions.Where(m => m.IsValidTarget(range) && m.UnitSkinName.Contains("Minion") && !m.UnitSkinName.Contains("Odin")).ToList();
         }
 
         private void Combo()
         {
-            var target = TargetSelector.GetTarget(R.Range);
+            var target = TargetSelector.GetTarget(Q.Range);
 
             if (target == null || !target.IsValidTarget())
                 return;
 
-            if (Champions.Gnar.MenuClass.comboemenu["UseEGapclose"].Enabled && CanKillWithUltCombo(target) && Q.Ready && W.Ready &&
-                 E.Ready && R.Ready && (Player.Distance(target) < Q.Range + E.Range * 2))
+            if (mini)
             {
-                CastRSmart(target);
-
-                E.Cast(Player.ServerPosition.Extend(target.ServerPosition, E.Range - 1));
-
-                W.Cast();
-                Q.Cast(target);
-            }
-            else
-            {
-                if (R.Ready && Champions.Gnar.MenuClass.combormenu["user"].Enabled && Champions.Gnar.MenuClass.comboronmenu["useron" + target.ChampionName.ToLower()].Enabled)
+                if (Q.Ready && Champions.Gnar.MenuClass.combominimenu["miniq"].Enabled)
                 {
-                    if (Player.GetSpellDamage(target, SpellSlot.R) > target.Health)
+                    var prediction = Q.GetPrediction(target);
+                    if (prediction.HitChance >= HitChance.High)
                     {
-                        CastRSmart(target);
+                        Q.Cast(prediction.UnitPosition);
                     }
-
-                    if (DamageToUnit(target) > target.Health)
-                    {
-                        CastRSmart(target);
-                    }
-
-                    if ((Q.Ready || E.Ready))
-                    {
-                        CastRSmart(target);
-                    }
-
-                    if (target.IsInRange(Player.AttackRange))
-                    {
-                        CastRSmart(target);
-                    }
-                }
-
-                // Use W Before Q
-                if (W.Ready && Champions.Gnar.MenuClass.combowmenu["usew"].Enabled && Champions.Gnar.MenuClass.miscoptionsmenu["UseWWhen"].Value == 0 &&
-                    (Q.Ready || target.IsInRange(Player.AttackRange)))
-                {
-                    W.Cast();
-                }
-
-                if (Q.Ready && Champions.Gnar.MenuClass.comboqmenu["useq"].Enabled)
-                {
-                    if (target.IsInRange(Q.Range))
-                        Q.Cast(target);
-                }
-
-                if (E.Ready && Champions.Gnar.MenuClass.comboemenu["usee"].Enabled)
-                {
-                    if (target.IsInRange(E.Range))
-                    {
-                        E.Cast(target.ServerPosition);
-                    }
-
                 }
             }
+            else //mega
+            {
+                //R
+                if (target != null && R.Ready && Champions.Gnar.MenuClass.comborwhitelist[target.ChampionName.ToLower()].Enabled && Champions.Gnar.MenuClass.combomegamenu["megar"].Enabled && !target.HasBuffOfType(BuffType.Stun))
+                {
+                    var prediction = R.GetPrediction(target); //We're not actually going to use this though really. Slows things down.
+                    var maxAngle = 180f;
+                    var step = maxAngle / 24f;
+                    var currentAngle = 0f;
+                    var currentStep = 0f;
+                    var direction = (Player.ServerPosition - prediction.UnitPosition).Normalized();
 
+                    //Go through angles
+                    while (true)
+                    {
+                        //If no good angle then stop trying to find one
+                        if (currentStep > maxAngle && currentAngle < 0)
+                            break;
+
+                        //Go through angles...
+                        if ((currentAngle == 0 || currentAngle < 0) && currentStep != 0)
+                        {
+                            currentAngle = (currentStep) * (float)Math.PI / 180;
+                            currentStep += step;
+                        }
+                        else if (currentAngle > 0)
+                            currentAngle = -currentAngle;
+                        Vector3 checkPoint;
+                        //Check direct line
+                        if (currentStep == 0)
+                        {
+                            currentStep = step;
+                            checkPoint = prediction.UnitPosition + 500 * direction; 
+                        }
+                        //Check via angles
+                        else
+                        {
+                            checkPoint = prediction.UnitPosition + 500 * direction.To2D().Rotated(currentAngle).To3D();
+                            Render.Circle(Player.Position + 500 * (checkPoint - prediction.UnitPosition).Normalized(), 50, 30, Color.Red);
+                        }
+
+                        //Is wall or building?
+                        if (NavMesh.WorldToCell(checkPoint).Flags.HasFlag(NavCellFlags.Wall | NavCellFlags.Building))
+                        {
+                            //Cast ult in that direction
+                            if (prediction.HitChance >= HitChance.High)
+                            {
+                                Render.Circle(Player.Position + 500 * (checkPoint - prediction.UnitPosition).Normalized(), 50, 30, Color.LightGreen);
+                                R.Cast(Player.Position + 500 * (checkPoint - prediction.UnitPosition).Normalized());
+                            }
+                            
+                            break;
+                        }
+                    }
+                }
+
+                //W
+                if (Wmega.Ready && Champions.Gnar.MenuClass.combomegamenu["megaw"].Enabled)
+                {
+                    if (target != null || target.HasBuffOfType(BuffType.Stun))
+                    {
+                        var prediction = Wmega.GetPrediction(target);
+                        if (prediction.HitChance >= HitChance.High)
+                        {
+                            Wmega.Cast(prediction.CastPosition);
+                        }
+                    }
+                }
+
+                //E
+                if (Emega.Ready && Champions.Gnar.MenuClass.combomegamenu["megae"].Enabled)
+                {
+                    if (target != null)
+                    {
+                        var prediction = Emega.GetPrediction(target);
+                        if (prediction.HitChance >= HitChance.High)
+                        {
+                            Emega.Cast(prediction.CastPosition);
+                        }
+                    }
+                }
+
+                //Q
+                if (Qmega.Ready && Champions.Gnar.MenuClass.combomegamenu["megaq"].Enabled)
+                {
+                    if (target != null)
+                    {
+                        var prediction = Qmega.GetPrediction(target);
+                        if (prediction.HitChance >= HitChance.High)
+                        {
+                            Qmega.Cast(prediction.UnitPosition);
+                        }
+                    }
+                }
+            }
         }
 
         private void Harass()
@@ -252,41 +275,70 @@ namespace HeavenSeries
             if (target == null || !target.IsValidTarget())
                 return;
 
-            // Use W Before Q
-            if (W.Ready && Champions.Gnar.MenuClass.harasswmenu["usew"].Enabled && Champions.Gnar.MenuClass.harasswmenu["usewmana"].Value <= Player.ManaPercent() && Champions.Gnar.MenuClass.miscoptionsmenu["UseWWhen"].Value == 0 &&
-                (Q.Ready || target.IsInRange(Player.AttackRange)))
+            if (mini)
             {
-                W.Cast();
+                if (Q.Ready && Champions.Gnar.MenuClass.harassminimenu["miniq"].Enabled)
+                {
+                    var prediction = Q.GetPrediction(target);
+                    if (prediction.HitChance >= HitChance.High)
+                    {
+                        Q.Cast(prediction.UnitPosition);
+                    }
+                }
             }
-
-            if (Q.Ready && Champions.Gnar.MenuClass.harassqmenu["useq"].Enabled && Champions.Gnar.MenuClass.harassqmenu["useqmana"].Value <= Player.ManaPercent())
+            else //mega
             {
+                //W
+                if (Wmega.Ready && Champions.Gnar.MenuClass.harassmegamenu["megaw"].Enabled)
+                {
+                    if (target != null || target.HasBuffOfType(BuffType.Stun))
+                    {
+                        var prediction = Wmega.GetPrediction(target);
+                        if (prediction.HitChance >= HitChance.High)
+                        {
+                            Wmega.Cast(prediction.CastPosition);
+                        }
+                    }
+                }
 
-                //if you want safe harass and E isn't ready... Don't harass.
-                if (Champions.Gnar.MenuClass.harassemenu["emode"].Value == 0 && !E.Ready)
-                    return;
+                //E
+                if (Emega.Ready && Champions.Gnar.MenuClass.harassmegamenu["megae"].Enabled)
+                {
+                    if (target != null)
+                    {
+                        var prediction = Emega.GetPrediction(target);
+                        if (prediction.HitChance >= HitChance.High)
+                        {
+                            Emega.Cast(prediction.CastPosition);
+                        }
+                    }
+                }
 
-                Q.Cast(target);
-            }
-
-            //Jump to last position
-            if (Champions.Gnar.MenuClass.harassemenu["emode"].Value == 0 && LastHarassPos != null && E.Ready && Champions.Gnar.MenuClass.harassemenu["useemana"].Value <= Player.ManaPercent())
-            {
-                E.Cast((Vector3)LastHarassPos);
-
-            }
-
-            //Land on target with E
-            if (E.Ready && Champions.Gnar.MenuClass.harassemenu["usee"].Enabled && Champions.Gnar.MenuClass.harassemenu["emode"].Value == 1 && Champions.Fizz.MenuClass.harassemenu["useemana"].Value <= Player.ManaPercent())
-            {
-                E.Cast(target.ServerPosition);
+                //Q
+                if (Qmega.Ready && Champions.Gnar.MenuClass.harassmegamenu["megaq"].Enabled)
+                {
+                    if (target != null)
+                    {
+                        var prediction = Qmega.GetPrediction(target);
+                        if (prediction.HitChance >= HitChance.High)
+                        {
+                            Qmega.Cast(prediction.UnitPosition);
+                        }
+                    }
+                }
             }
         }
 
 
         private void JungleClear()
         {
-
+            foreach (var minion in GetEnemyLaneMinionsTargetsInRange(Q.Range))
+            {
+                if (minion.IsValidTarget(Q.Range) && minion != null)
+                {
+                    Q.Cast(minion);
+                }
+            }
         }
 
         private void LaneClear()
