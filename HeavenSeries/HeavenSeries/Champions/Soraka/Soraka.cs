@@ -14,6 +14,7 @@ using Aimtec.SDK.Util.Cache;
 using Spell = Aimtec.SDK.Spell;
 using Aimtec.SDK.Prediction.Skillshots;
 using System.Collections.Generic;
+using Aimtec.SDK.Events;
 
 namespace HeavenSeries
 {
@@ -67,6 +68,7 @@ namespace HeavenSeries
             var Misc = new Menu("Misc", "Misc");
             {
                 Misc.Add(new MenuBool("supportmode", "Support Mode", true));
+                Misc.Add(new MenuBool("antigapclose", "Antigapclose E", true));
             }
             Menu.Add(Misc);
 
@@ -88,6 +90,7 @@ namespace HeavenSeries
             Render.OnPresent += Render_OnPresent;
             Game.OnUpdate += Game_OnUpdate;
             Orbwalker.PreAttack += Orbwalker_OnPreAttack;
+            Dash.HeroDashed += OnGapcloser;
 
             Console.WriteLine("HeavenSeries - " + Player.ChampionName + " loaded.");
         }
@@ -137,6 +140,43 @@ namespace HeavenSeries
                         args.Cancel = GameObjects.AllyHeroes.Any(a => !a.IsMe && a.Distance(Player) < 2500);
                     }
                     break;
+            }
+        }
+
+        public void OnGapcloser(object sender, Dash.DashArgs args)
+        {
+            if (Player.IsDead)
+            {
+                return;
+            }
+
+            var gapSender = (Obj_AI_Hero)args.Unit;
+            if (gapSender == null || !gapSender.IsEnemy)
+            {
+                return;
+            }
+
+            if (E.Ready &&
+               Menu["Misc"]["antigapclose"].Enabled)
+            {
+                var playerPos = Player.ServerPosition;
+                if (args.EndPos.Distance(playerPos) <= 200)
+                {
+                    E.Cast(gapSender);
+                }
+                else
+                {
+                    var bestAlly = GameObjects.AllyHeroes
+                        .Where(a =>
+                            a.IsValidTarget(Q.Range, true) &&
+                            args.EndPos.Distance(a.ServerPosition) <= 200)
+                        .OrderBy(o => o.Distance(args.EndPos))
+                        .FirstOrDefault();
+                    if (bestAlly != null)
+                    {
+                        E.Cast(gapSender);
+                    }
+                }
             }
         }
 
