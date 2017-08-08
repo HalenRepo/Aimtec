@@ -297,13 +297,13 @@
                 return;
             foreach (var minion in minions)
             {
-                if (W.Ready && Champions.Kindred.MenuClass.JungleClearw["usew"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleClearw["usewmana"].Value)
+                if (W.Ready && Champions.Kindred.MenuClass.JungleClearw["usew"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleClearw["usewmana"].Value && Player.GetAutoAttackDamage(minion) < minion.Health)
                     W.Cast();
 
-                if (Q.Ready && Champions.Kindred.MenuClass.JungleClearq["useq"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleClearq["useqmana"].Value)
+                if (Q.Ready && Champions.Kindred.MenuClass.JungleClearq["useq"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleClearq["useqmana"].Value && Player.GetAutoAttackDamage(minion) < minion.Health)
                     Q.Cast(dashPosition);
 
-                if (E.Ready && Champions.Kindred.MenuClass.JungleCleare["usee"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleCleare["useemana"].Value)
+                if (E.Ready && Champions.Kindred.MenuClass.JungleCleare["usee"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleCleare["useemana"].Value && Player.GetAutoAttackDamage(minion) < minion.Health)
                     E.Cast(minion);
             }
         }

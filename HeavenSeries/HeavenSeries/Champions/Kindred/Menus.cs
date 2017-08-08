@@ -51,7 +51,6 @@ namespace HeavenSeries
                     Champions.Kindred.MenuClass.comboemenu = new Menu("comboemenu", "E");
                     {
                         Champions.Kindred.MenuClass.comboemenu.Add(new MenuBool("usee", "Use E"));
-                        Champions.Kindred.MenuClass.comboemenu.Add(new MenuBool("UseEGapclose", "Use E for gapclose if killable"));
                     }
                     Champions.Kindred.MenuClass.combomenu.Add(Champions.Kindred.MenuClass.comboemenu);
 
