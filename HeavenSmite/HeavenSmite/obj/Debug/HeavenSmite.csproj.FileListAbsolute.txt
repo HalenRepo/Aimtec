@@ -1,1 +1,10 @@
 f:\users\tim\documents\visual studio 2017\Projects\HeavenSmite\HeavenSmite\obj\Debug\HeavenSmite.csprojResolveAssemblyReference.cache
+f:\users\tim\documents\visual studio 2017\Projects\HeavenSmite\HeavenSmite\bin\Debug\HeavenSmite.exe.config
+f:\users\tim\documents\visual studio 2017\Projects\HeavenSmite\HeavenSmite\bin\Debug\HeavenSmite.exe
+f:\users\tim\documents\visual studio 2017\Projects\HeavenSmite\HeavenSmite\bin\Debug\HeavenSmite.pdb
+f:\users\tim\documents\visual studio 2017\Projects\HeavenSmite\HeavenSmite\bin\Debug\Aimtec.dll
+f:\users\tim\documents\visual studio 2017\Projects\HeavenSmite\HeavenSmite\bin\Debug\Aimtec.SDK.dll
+f:\users\tim\documents\visual studio 2017\Projects\HeavenSmite\HeavenSmite\bin\Debug\NLog.dll
+f:\users\tim\documents\visual studio 2017\Projects\HeavenSmite\HeavenSmite\bin\Debug\Newtonsoft.Json.dll
+f:\users\tim\documents\visual studio 2017\Projects\HeavenSmite\HeavenSmite\obj\Debug\HeavenSmite.exe
+f:\users\tim\documents\visual studio 2017\Projects\HeavenSmite\HeavenSmite\obj\Debug\HeavenSmite.pdb

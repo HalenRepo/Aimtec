@@ -87,75 +87,164 @@ namespace HeavenSmiteReborn
             {
                 DrawMenu.Add(new MenuBool("DrawSmiteRange", "Smite Range", false));
                 DrawMenu.Add(new MenuBool("AutoSmiteToggle", "AutoSmite State"));
+                DrawMenu.Add(new MenuBool("DrawDamage", "Draw Smite Damage"));
             }
             Menu.Add(DrawMenu);
             Menu.Attach();
 
-            Game.OnUpdate += delegate
-            {
-                if (Player.IsDead && !Smite.Ready)
-                    return;
-
-                if (Menu["Draw"]["DrawSmiteRange"].Enabled)
-                    Render.Circle(Player.Position, Smite.Range, 30, Color.LightGreen);
-
-                if (Menu["Draw"]["AutoSmiteToggle"].Enabled)
-                {
-                    if (Render.WorldToScreen(Player.Position, out Vector2 coord))
-                    {
-                        coord.Y -= -30;
-                        if (coord.X > 0 && coord.Y > 0 && coord.X < Render.Width && coord.Y < Render.Height)
-                            Render.Text(coord.X, coord.Y, Menu["Key"].Enabled ? Color.LightGreen : Color.Red, Menu["Key"].Enabled ? "SMITE: ON" : "SMITE: OFF");
-                    }
-                }
-
-                if (!Menu["Key"].Enabled)
-                    return;
-
-                foreach (var Obj in ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamages >= x.Health && !x.IsDead && x.IsValidSpellTarget()))
-                {
-
-                    if (pMobs.Contains(Obj.UnitSkinName))
-                    {
-                        if (Menu["BigMobs"][Obj.UnitSkinName].Enabled)
-                            Smite.Cast(Obj);
-                    }
-
-                    if (Obj.UnitSkinName.Contains("Dragon"))
-                    {
-                        
-                        if (Menu["Dragons"][Obj.UnitSkinName].Enabled)
-                            Smite.Cast(Obj);
-                    }
-
-                    if (small.Contains(Obj.UnitSkinName))
-                    {
-                        if (Menu["SmallMobs"][Obj.UnitSkinName].Enabled)
-                            Smite.Cast(Obj);
-                    }
-                }
-
-                if (Menu["Champion"]["ChampionToggle"].Enabled)
-                {
-                    foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamagesChamp >= x.Health && x.IsEnemy))
-                    {
-                        
-                        if (Menu["Champion"]["smiteKS" + Obj.ChampionName.ToLower()].Enabled)
-                        {
-                            //Preserve smite charge?
-                            if (Menu["Champion"]["smiteCharge"].Enabled)
-                            {
-                                if (Player.SpellBook.Spells.FirstOrDefault(spell => spell.Name.Contains("Smite")).Ammo <= 1)
-                                    return;
-                            }
-
-                            Smite.Cast(Obj);
-                        }
-                        
-                    }
-
-                }
-            };
+            Render.OnPresent += Render_OnPresent;
+            Game.OnUpdate += Game_OnUpdate;
         }
+
+        private void Game_OnUpdate()
+        {
+            if (Player.IsDead && !Smite.Ready)
+                return;
+
+            if (Menu["Draw"]["DrawSmiteRange"].Enabled)
+                Render.Circle(Player.Position, Smite.Range, 30, Color.LightGreen);
+
+            if (Menu["Draw"]["AutoSmiteToggle"].Enabled)
+            {
+                if (Render.WorldToScreen(Player.Position, out Vector2 coord))
+                {
+                    coord.Y -= -30;
+                    if (coord.X > 0 && coord.Y > 0 && coord.X < Render.Width && coord.Y < Render.Height)
+                        Render.Text(coord.X, coord.Y, Menu["Key"].Enabled ? Color.LightGreen : Color.Red, Menu["Key"].Enabled ? "SMITE: ON" : "SMITE: OFF");
+                }
+            }
+
+            if (!Menu["Key"].Enabled)
+                return;
+
+            foreach (var Obj in ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamages >= x.Health && !x.IsDead && x.IsValidSpellTarget()))
+            {
+
+                if (pMobs.Contains(Obj.UnitSkinName) || Obj.UnitSkinName.Contains("Baron"))
+                {
+                    if (Menu["BigMobs"][Obj.UnitSkinName].Enabled)
+                        Smite.Cast(Obj);
+                }
+
+                if (Obj.UnitSkinName.Contains("Dragon"))
+                {
+
+                    if (Menu["Dragons"][Obj.UnitSkinName].Enabled)
+                        Smite.Cast(Obj);
+                }
+
+                if (small.Contains(Obj.UnitSkinName))
+                {
+                    if (Menu["SmallMobs"][Obj.UnitSkinName].Enabled)
+                        Smite.Cast(Obj);
+                }
+            }
+
+            if (Menu["Champion"]["ChampionToggle"].Enabled)
+            {
+                foreach (var Obj in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(Smite.Range) && SmiteDamagesChamp >= x.Health && x.IsEnemy))
+                {
+
+                    if (Menu["Champion"]["smiteKS" + Obj.ChampionName.ToLower()].Enabled)
+                    {
+                        //Preserve smite charge?
+                        if (Menu["Champion"]["smiteCharge"].Enabled)
+                        {
+                            if (Player.SpellBook.Spells.FirstOrDefault(spell => spell.Name.Contains("Smite")).Ammo <= 1)
+                                return;
+                        }
+
+                        Smite.Cast(Obj);
+                    }
+
+                }
+
+            }
+        }
+
+        private static void Render_OnPresent()
+        {
+            if (Menu["Draw"]["DrawDamage"].Enabled)
+            {
+                foreach (var minion in ObjectManager.Get<Obj_AI_Minion>().Where(x => x.IsValidTarget(1500) && !x.IsDead && x.IsValidSpellTarget() && x.IsVisible && x.IsFloatingHealthBarActive && x.IsValid))
+                {
+                    // Monster bar widths and offsets from ElSmite
+                    var barWidth = 0;
+                    var xOffset = 0;
+                    var yOffset = 0;
+                    var height = 10;
+                    switch (minion.UnitSkinName)
+                    {
+                        case "SRU_Red":
+                        case "SRU_Blue":
+                        case "SRU_Dragon_Air":
+                        case "SRU_Dragon_Earth":
+                        case "SRU_Dragon_Fire":
+                        case "SRU_Dragon_Water":
+                        case "SRU_Dragon_Elder":
+                        case "SRU_RiftHerald":
+                            barWidth = 145;
+                            xOffset = 10;
+                            yOffset = 20;
+                            height = 10;
+                            break;
+
+                        case "SRU_Baron":
+                            barWidth = 194;
+                            xOffset = 15;
+                            yOffset = 23;
+                            height = 13;
+                            break;
+
+                        case "Sru_Crab":
+                            barWidth = 61;
+                            xOffset = 0;
+                            yOffset = 3;
+                            height = 5;
+                            break;
+
+                        case "SRU_Krug":
+                            barWidth = 92;
+                            xOffset = 0;
+                            yOffset = 5;
+                            height = 5;
+                            break;
+
+                        case "SRU_Gromp":
+                            barWidth = 92;
+                            xOffset = 0;
+                            yOffset = 5;
+                            height = 5;
+                            break;
+
+                        case "SRU_Murkwolf":
+                            barWidth = 92;
+                            xOffset = 0;
+                            yOffset = 5;
+                            height = 5;
+                            break;
+
+                        case "SRU_Razorbeak":
+                            barWidth = 75;
+                            xOffset = 0;
+                            yOffset = 5;
+                            height = 5;
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    var barPos = minion.FloatingHealthBarPosition;
+                    var percentHealthAfterDamage = Math.Max(0, minion.Health - SmiteDamages) / minion.MaxHealth;
+                    var xPosDamage = barPos.X + xOffset + barWidth * percentHealthAfterDamage;
+                    var xPosCurrentHp = barPos.X + xOffset + barWidth * minion.Health / minion.MaxHealth;
+
+                    Render.Rectangle(new Vector2((float)barPos.X + xOffset, barPos.Y + yOffset), (float)xPosCurrentHp - xPosDamage, height, Color.FromArgb(100, 255, 255, 0));
+
+                }
+            }
+        }
+            
     }
 }
