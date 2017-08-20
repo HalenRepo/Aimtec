@@ -261,7 +261,7 @@
 
             if (W.Ready)
             {
-                //TODO GRAB CDR of Q. If Q = 4, RECAST W. Add to below with ||
+                //TODO GRAB CDR of Q. If Q = 4, RECAST W. Add to below with || // Now done
                 if (Q.Ready || target.HealthPercent() < 15 || Player.SpellBook.GetSpell(SpellSlot.Q).Cooldown == 4)
                 {
                     if (Champions.Kindred.MenuClass.harasswmenu["usew"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.harasswmenu["usewmana"].Value)
@@ -297,7 +297,8 @@
                 return;
             foreach (var minion in minions)
             {
-                if (W.Ready && Champions.Kindred.MenuClass.JungleClearw["usew"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleClearw["usewmana"].Value && Player.GetAutoAttackDamage(minion) < minion.Health)
+                //Added mana check for Q after using W. // Player.SpellBook.GetSpell(SpellSlot.Q).Cost < Player.Mana - Player.SpellBook.GetSpell(SpellSlot.W).Cost
+                if (W.Ready && Champions.Kindred.MenuClass.JungleClearw["usew"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleClearw["usewmana"].Value && Player.GetAutoAttackDamage(minion) < minion.Health && Player.SpellBook.GetSpell(SpellSlot.Q).Cost < Player.Mana - Player.SpellBook.GetSpell(SpellSlot.W).Cost)
                     W.Cast();
 
                 if (Q.Ready && Champions.Kindred.MenuClass.JungleClearq["useq"].Enabled && Player.ManaPercent() >= Champions.Kindred.MenuClass.JungleClearq["useqmana"].Value && Player.GetAutoAttackDamage(minion) < minion.Health)

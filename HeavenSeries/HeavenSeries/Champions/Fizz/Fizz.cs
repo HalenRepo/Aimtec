@@ -127,6 +127,18 @@ namespace HeavenSeries
         {
             if (IOrbwalker.Mode == OrbwalkingMode.None)
                 return;
+
+            if (IOrbwalker.Mode == OrbwalkingMode.Combo || IOrbwalker.Mode == OrbwalkingMode.Mixed)
+            {
+                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget() && x.Distance(Player) <= Player.AttackRange && x.HasBuff("fizzwdot") && x.IsVisible))
+                {
+                    if (target == null)
+                        return;
+                    
+                    Player.IssueOrder(OrderType.AutoAttack, target);
+                }
+            }
+            
         }
 
         public void OnProcessSpellCast(Obj_AI_Base sender, Obj_AI_BaseMissileClientDataEventArgs args)
@@ -139,6 +151,11 @@ namespace HeavenSeries
             if (!sender.IsMe)
             {
                 return;
+            }
+
+            if (args.SpellData.Name == "FizzW")
+            {
+                DelayAction.Queue(Game.Ping, IOrbwalker.ResetAutoAttackTimer);
             }
 
             if (args.SpellData.Name == "FizzQ")
@@ -256,6 +273,10 @@ namespace HeavenSeries
                 {
                     if (target.IsInRange(Q.Range))
                         Q.Cast(target);
+
+
+                    Player.IssueOrder(OrderType.AutoAttack, target); //proc w passive
+
                 }
 
                 if (E.Ready && Champions.Fizz.MenuClass.comboemenu["usee"].Enabled)
@@ -292,13 +313,20 @@ namespace HeavenSeries
                     return;
 
                 Q.Cast(target);
+                Player.IssueOrder(OrderType.AutoAttack, target); //proc w passive
+                DelayAction.Queue(Game.Ping + 1000, () => Jump(target));
             }
 
+            Jump(target);
+        }
+
+        private void Jump(Obj_AI_Hero target)
+        {
             //Jump to last position
             if (Champions.Fizz.MenuClass.harassemenu["emode"].Value == 0 && LastHarassPos != null && E.Ready && Champions.Fizz.MenuClass.harassemenu["useemana"].Value <= Player.ManaPercent())
             {
                 E.Cast((Vector3)LastHarassPos);
-                
+
             }
 
             //Land on target with E

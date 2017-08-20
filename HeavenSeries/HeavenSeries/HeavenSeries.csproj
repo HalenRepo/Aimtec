@@ -72,6 +72,9 @@
     <Compile Include="Champions\Nidalee\MenuClass.cs" />
     <Compile Include="Champions\Nidalee\Menus.cs" />
     <Compile Include="Champions\Nidalee\Nidalee.cs" />
+    <Compile Include="Champions\Rumble\MenuClass.cs" />
+    <Compile Include="Champions\Rumble\Menus.cs" />
+    <Compile Include="Champions\Rumble\Rumble.cs" />
     <Compile Include="Champions\Soraka\Soraka.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

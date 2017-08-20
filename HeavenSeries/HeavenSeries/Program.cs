@@ -24,9 +24,9 @@
                     var Elise = new Elise();
                     break;
 
-                case "Fizz":
+                /*case "Fizz":
                     var Fizz = new Fizz();
-                    break;
+                    break;*/
 
                 /*case "Gnar":
                     var Gnar = new Gnar();
@@ -48,18 +48,13 @@
                      var Nidalee = new Nidalee();
                     break;
 
-                /*case "RekSai":
-                    var RekSai = new RekSai();
-                    break;*/
+                case "Rumble":
+                    var Rumble = new Rumble();
+                    break;
 
                 case "Soraka":
                     var Soraka = new Soraka();
                     break;
-
-                /*case "Thresh":
-                 var Thresh = new Thresh();
-                break;*/
-
 
                 default: Console.WriteLine("Champion not supported.");
                     break;
