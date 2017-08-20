@@ -180,10 +180,10 @@ namespace HeavenSeries
                     }
                 }
                 //best endpoint
-                maxhit = results.MaxBy(x => x.NumberOfMinionsHit);
+                maxhit = results.MaxBy(x => x.NumberOfChampionsHit);
 
                 //Then ult
-                if (maxhit != null && maxhit.GetTarget != null && maxhit.NumberOfMinionsHit >= Champions.Rumble.MenuClass.combormenu["minenemies"].Value - 1) //-1 because initial target.
+                if (maxhit != null && maxhit.GetTarget != null && maxhit.NumberOfChampionsHit >= Champions.Rumble.MenuClass.combormenu["minenemies"].Value - 1) //-1 because initial target.
                 {
                     /*Render.Circle(maxhit.CastPosition, 30, 30, Color.Blue);
                     Render.Circle(maxhit.GetTarget.Position, 30, 30, Color.Red);
@@ -266,12 +266,12 @@ namespace HeavenSeries
         {
             public UltResult(int hit, Vector3 cp, Obj_AI_Hero target)
             {
-                NumberOfMinionsHit = hit;
+                NumberOfChampionsHit = hit;
                 CastPosition = cp;
                 GetTarget = target;
             }
 
-            public int NumberOfMinionsHit;
+            public int NumberOfChampionsHit;
             public Vector3 CastPosition;
             public Obj_AI_Hero GetTarget;
         } 
