@@ -109,7 +109,7 @@ namespace HeavenSeries
             if (Champions.Fizz.MenuClass.drawmenu["drawr"].Enabled)
                 Render.Circle(Player.Position, R.Range, 30, Color.White);
 
-            if (LastHarassPos != null && Champions.Fizz.MenuClass.harassemenu["emode"].Value == 0)
+            if (LastHarassPos != null && Champions.Fizz.MenuClass.harassemenu["emode"].Value == 0 && IOrbwalker.Mode == OrbwalkingMode.Mixed)
             {
                 Render.Circle((Vector3)LastHarassPos, 100, 30, Color.Red);
             }
@@ -127,17 +127,6 @@ namespace HeavenSeries
         {
             if (IOrbwalker.Mode == OrbwalkingMode.None)
                 return;
-
-            if (IOrbwalker.Mode == OrbwalkingMode.Combo || IOrbwalker.Mode == OrbwalkingMode.Mixed)
-            {
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget() && x.Distance(Player) <= Player.AttackRange && x.HasBuff("fizzwdot") && x.IsVisible))
-                {
-                    if (target == null)
-                        return;
-                    
-                    Player.IssueOrder(OrderType.AutoAttack, target);
-                }
-            }
             
         }
 
@@ -153,17 +142,12 @@ namespace HeavenSeries
                 return;
             }
 
-            if (args.SpellData.Name == "FizzW")
-            {
-                DelayAction.Queue(Game.Ping, IOrbwalker.ResetAutoAttackTimer);
-            }
-
             if (args.SpellData.Name == "FizzQ")
             {
-                if (IOrbwalker.Mode == OrbwalkingMode.Combo)
+                /*if (IOrbwalker.Mode == OrbwalkingMode.Combo)
                 {
                     DelayAction.Queue((int)(sender.SpellBook.CastEndTime - Game.ClockTime) + Game.Ping / 2 + 250, () => W.Cast());
-                }
+                }*/
 
                 if (IOrbwalker.Mode == OrbwalkingMode.Mixed && E.Ready)
                 {
@@ -234,8 +218,18 @@ namespace HeavenSeries
 
                 E.Cast(Player.ServerPosition.Extend(target.ServerPosition, E.Range - 1));
 
-                W.Cast();
-                Q.Cast(target);
+                if (target.IsInRange(Q.Range))
+                {
+                    Q.Cast(target);
+                    Orbwalker.ForceTarget(target);
+                }
+                    
+                DelayAction.Queue(3000 - Game.Ping, () =>
+                {
+                    if (target.HasBuff("fizzwdot"))
+                        W.Cast();
+                });
+
             }
             else
             {
@@ -262,31 +256,43 @@ namespace HeavenSeries
                     }
                 }
 
-                // Use W Before Q
-                if (W.Ready && Champions.Fizz.MenuClass.combowmenu["usew"].Enabled && Champions.Fizz.MenuClass.miscoptionsmenu["UseWWhen"].Value == 0 &&
+                // Use W Before Q //not good now after fizz changes.
+                /*if (W.Ready && Champions.Fizz.MenuClass.combowmenu["usew"].Enabled && Champions.Fizz.MenuClass.miscoptionsmenu["UseWWhen"].Value == 0 &&
                     (Q.Ready || target.IsInRange(Player.AttackRange)))
                 {
                     W.Cast();
-                }
+                }*/
 
                 if (Q.Ready && Champions.Fizz.MenuClass.comboqmenu["useq"].Enabled)
                 {
                     if (target.IsInRange(Q.Range))
-                        Q.Cast(target);
-
-
-                    Player.IssueOrder(OrderType.AutoAttack, target); //proc w passive
-
-                }
-
-                if (E.Ready && Champions.Fizz.MenuClass.comboemenu["usee"].Enabled)
-                {
-                    if (target.IsInRange(E.Range))
                     {
-                        E.Cast(target.ServerPosition);
+                        Q.Cast(target);
+                        Orbwalker.ForceTarget(target);
                     }
-                        
+
+                    DelayAction.Queue(1000 - Game.Ping, () =>
+                    {
+                        if (E.Ready && Champions.Fizz.MenuClass.comboemenu["usee"].Enabled)
+                        {
+                            if (target.IsInRange(E.Range))
+                            {
+                                E.Cast(target.ServerPosition);
+                            }
+                        }
+                    });
+
+                    DelayAction.Queue(3000 - Game.Ping, () =>
+                    {
+                        if (W.Ready && target.HasBuff("fizzwdot"))
+                        {
+                            W.Cast();
+                        }
+                            
+                    });
                 }
+
+               
             }
 
         }
@@ -298,12 +304,12 @@ namespace HeavenSeries
             if (target == null || !target.IsValidTarget())
                 return;
 
-            // Use W Before Q
-            if (W.Ready && Champions.Fizz.MenuClass.harasswmenu["usew"].Enabled && Champions.Fizz.MenuClass.harasswmenu["usewmana"].Value <= Player.ManaPercent() && Champions.Fizz.MenuClass.miscoptionsmenu["UseWWhen"].Value == 0 &&
+            // Use W Before Q //no longer good after fizz changes.
+            /*if (W.Ready && Champions.Fizz.MenuClass.harasswmenu["usew"].Enabled && Champions.Fizz.MenuClass.harasswmenu["usewmana"].Value <= Player.ManaPercent() && Champions.Fizz.MenuClass.miscoptionsmenu["UseWWhen"].Value == 0 &&
                 (Q.Ready || target.IsInRange(Player.AttackRange)))
             {
                 W.Cast();
-            }
+            }*/
 
             if (Q.Ready && Champions.Fizz.MenuClass.harassqmenu["useq"].Enabled && Champions.Fizz.MenuClass.harassqmenu["useqmana"].Value <= Player.ManaPercent())
             {
@@ -313,26 +319,56 @@ namespace HeavenSeries
                     return;
 
                 Q.Cast(target);
-                Player.IssueOrder(OrderType.AutoAttack, target); //proc w passive
-                DelayAction.Queue(Game.Ping + 1000, () => Jump(target));
-            }
+                Orbwalker.ForceTarget(target);
 
-            Jump(target);
-        }
+                //Here comes the broscience
 
-        private void Jump(Obj_AI_Hero target)
-        {
-            //Jump to last position
-            if (Champions.Fizz.MenuClass.harassemenu["emode"].Value == 0 && LastHarassPos != null && E.Ready && Champions.Fizz.MenuClass.harassemenu["useemana"].Value <= Player.ManaPercent())
-            {
-                E.Cast((Vector3)LastHarassPos);
+                DelayAction.Queue(1000 - Game.Ping, () =>
+                {
+                    if (E.Ready && Champions.Fizz.MenuClass.harassemenu["usee"].Enabled)
+                    {
+                        if (target.IsInRange(E.Range))
+                        {
+                            //Jump to last position
+                            if (Champions.Fizz.MenuClass.harassemenu["emode"].Value == 0 && LastHarassPos != null && E.Ready && Champions.Fizz.MenuClass.harassemenu["useemana"].Value <= Player.ManaPercent())
+                            {
+                                E.Cast((Vector3)LastHarassPos);
 
-            }
+                            }
 
-            //Land on target with E
-            if (E.Ready && Champions.Fizz.MenuClass.harassemenu["usee"].Enabled && Champions.Fizz.MenuClass.harassemenu["emode"].Value == 1 && Champions.Fizz.MenuClass.harassemenu["useemana"].Value <= Player.ManaPercent())
-            {
-                E.Cast(target.ServerPosition);
+                            //Land on target with E
+                            if (E.Ready && Champions.Fizz.MenuClass.harassemenu["usee"].Enabled && Champions.Fizz.MenuClass.harassemenu["emode"].Value == 1 && Champions.Fizz.MenuClass.harassemenu["useemana"].Value <= Player.ManaPercent())
+                            {
+                                E.Cast(target.ServerPosition);
+                            }
+                        }
+                    }
+                });
+
+                if (Champions.Fizz.MenuClass.harassmenu["emode"].Value == 1)
+                {
+                    DelayAction.Queue(3000 - Game.Ping, () =>
+                    {
+                        if (W.Ready && target.HasBuff("fizzwdot"))
+                        {
+                            W.Cast();
+                        }
+
+                    });
+                }
+
+                if (Champions.Fizz.MenuClass.harassmenu["emode"].Value == 0)
+                {
+                    DelayAction.Queue(1500 - Game.Ping, () =>
+                    {
+                        if (W.Ready && target.HasBuff("fizzwdot"))
+                        {
+                            W.Cast();
+                        }
+
+                    });
+                }
+            
             }
         }
 

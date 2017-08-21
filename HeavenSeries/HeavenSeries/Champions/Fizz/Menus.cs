@@ -47,7 +47,7 @@ namespace HeavenSeries
                     Champions.Fizz.MenuClass.comboemenu = new Menu("comboemenu", "E");
                     {
                         Champions.Fizz.MenuClass.comboemenu.Add(new MenuBool("usee", "Use E"));
-                        Champions.Fizz.MenuClass.comboemenu.Add(new MenuBool("UseEGapclose", "Use E for gapclose if killable"));
+                        Champions.Fizz.MenuClass.comboemenu.Add(new MenuBool("UseEGapclose", "Use E for gapclose if Killable"));
                     }
                     Champions.Fizz.MenuClass.combomenu.Add(Champions.Fizz.MenuClass.comboemenu);
 
@@ -102,11 +102,8 @@ namespace HeavenSeries
                 //Misc menu - 
                 Champions.Fizz.MenuClass.miscmenu = new Menu("miscmenu", "Misc");
                 {
-                    Champions.Fizz.MenuClass.miscoptionsmenu = new Menu("miscoptionsmenu", "Combo Options");
+                    Champions.Fizz.MenuClass.miscoptionsmenu = new Menu("miscoptionsmenu", "E Options");
                     {
-                        Champions.Fizz.MenuClass.miscoptionsmenu.Add(new MenuList(
-                                       "UseWWhen",
-                                       "Use W: ", new[] { "Before Q", "After Q" }, 1));
                         Champions.Fizz.MenuClass.miscoptionsmenu.Add(new MenuBool("UseETower", "Dodge Tower Shots with E", false));
 
                     }
@@ -128,7 +125,7 @@ namespace HeavenSeries
                 {
 
                     Champions.Fizz.MenuClass.drawmenu.Add(new MenuBool("drawq", "Draw Q"));
-                    Champions.Fizz.MenuClass.drawmenu.Add(new MenuBool("draww", "Draw W"));
+                    Champions.Fizz.MenuClass.drawmenu.Add(new MenuBool("draww", "Draw W", false));
                     Champions.Fizz.MenuClass.drawmenu.Add(new MenuBool("drawe", "Draw E", false));
                     Champions.Fizz.MenuClass.drawmenu.Add(new MenuBool("drawr", "Draw R", false));
                 }

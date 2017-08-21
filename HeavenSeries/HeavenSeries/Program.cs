@@ -24,9 +24,9 @@
                     var Elise = new Elise();
                     break;
 
-                /*case "Fizz":
+                case "Fizz":
                     var Fizz = new Fizz();
-                    break;*/
+                    break;
 
                 /*case "Gnar":
                     var Gnar = new Gnar();
