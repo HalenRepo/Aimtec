@@ -39,19 +39,19 @@ namespace Avoider
         {
             if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy")
             {
-                if (!sender.IsAlly)
+                if (sender.IsAlly)
                     trapsList.Add(sender);
             }
 
             if (sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
             {
-                if (!sender.IsAlly)
+                if (sender.IsAlly)
                     trapsList.Add(sender);
             }
 
             if (sender.Name == "Nidalee_Base_W_TC_Green.troy")
             {
-                if (!sender.IsAlly)
+                if (sender.IsAlly)
                     trapsList.Add(sender);
             }
         }
@@ -60,19 +60,19 @@ namespace Avoider
         {
             if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy")
             {
-                if (!sender.IsAlly)
+                if (sender.IsAlly)
                     trapsList.Remove(sender);
             }
 
             if (sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
             {
-                if (!sender.IsAlly)
+                if (sender.IsAlly)
                     trapsList.Remove(sender);
             }
 
             if (sender.Name == "Nidalee_Base_W_TC_Green.troy")
             {
-                if (!sender.IsAlly)
+                if (sender.IsAlly)
                     trapsList.Remove(sender);
             }
         }
