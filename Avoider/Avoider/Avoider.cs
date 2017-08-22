@@ -39,7 +39,7 @@ namespace Avoider
         {
 
             if (!sender.IsAlly)
-                return;
+               return;
 
             if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy")
             {
@@ -125,7 +125,7 @@ namespace Avoider
                     {
                         Avoid(trapsList[i].Position, 200, trapsList[i]);
                     }
-                    break;
+
                 }
                 else
                 {
