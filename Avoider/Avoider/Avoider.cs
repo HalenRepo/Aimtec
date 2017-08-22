@@ -39,7 +39,7 @@ namespace Avoider
         {
 
             if (!sender.IsAlly)
-               return;
+                return;
 
             if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy")
             {
@@ -69,7 +69,7 @@ namespace Avoider
 
             if (sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
             {
-                trapsList.Remove(sender);
+                //trapsList.Remove(sender);
             }
 
             if (sender.Name == "Nidalee_Base_W_TC_Green.troy")
@@ -108,29 +108,24 @@ namespace Avoider
                 if (Menu["Object"].Enabled)
                  Render.Circle(trapsList[i].Position, 65, 30, Color.Red);
 
-
-
-                if (Player.Distance(trapsList[i]) < 200 && Player.Distance(trapsList[i]) > 75 && !Player.HasBuffOfType(BuffType.Snare))
+                //caitlyn trap
+                if (trapsList[i].Name == "Caitlyn_Base_W_Indicator_SizeRing.troy" && Player.Distance(trapsList[i]) < 200)
                 {
-                    Orbwalker.Implementation.AttackingEnabled = false;
-                    //caitlyn trap
-                    if (trapsList[i].Name == "Caitlyn_Base_W_Indicator_SizeRing.troy")
-                    {
-                        Avoid(trapsList[i].Position, 200, trapsList[i]);
-
-                    }
-
-                    //jinx trap
-                    if (trapsList[i].Name == "Jinx_Base_E_Mine_Ready_Green.troy")
-                    {
-                        Avoid(trapsList[i].Position, 200, trapsList[i]);
-                    }
-
+                    Avoid(trapsList[i].Position, 200, trapsList[i]);
                 }
-                else
+
+                //jinx trap
+                if (trapsList[i].Name == "Jinx_Base_E_Mine_Ready_Green.troy" && Player.Distance(trapsList[i]) < 200)
                 {
-                    Orbwalker.Implementation.AttackingEnabled = true;
+                    //Avoid(trapsList[i].Position, 200, trapsList[i]);
                 }
+
+                //nidalee trap
+                if (trapsList[i].Name == "Nidalee_Base_W_TC_Green.troy" && Player.Distance(trapsList[i]) < 200)
+                {
+                    Avoid(trapsList[i].Position, 200, trapsList[i]);
+                }
+
             }
         }
 
@@ -139,15 +134,8 @@ namespace Avoider
             List<Vector3> points = new List<Vector3>();
             for (var i = 1; i <= 360; i++)
             {
-                var angle = i * Math.PI / 360; //angle = i * 2 * Math.PI / 360;
-
+                var angle = i * 2 * Math.PI / 360; //angle = i * 2 * Math.PI / 360;
                 var point = new Vector3(position.X + radius * (float)Math.Cos(angle), position.Y + radius * (float)Math.Sin(angle), position.Z + radius * (float)Math.Sin(angle));
-
-                if (trap.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
-                {
-                    //point = Player.ServerPosition + (Player.ServerPosition - 100).Normalized() * Math.Min((Player.BoundingRadius + 50) * 1.25f, position.Z + radius * (float)Math.Cos(angle));
-                    //point = new Vector3(position.X + radius * (float)Math.Cos(angle), position.Y + radius * (float)Math.Sin(angle), position.Z + radius * (float)Math.Sin(angle));
-                }
 
                 points.Add(point);
             }
@@ -171,7 +159,6 @@ namespace Avoider
             {
                 if (Menu["Pathing"].Enabled)
                     Render.Circle(getPoint, 30, 30, Color.LightBlue);
-
                 Orbwalker.Implementation.Move(getPoint);
             }
         }
