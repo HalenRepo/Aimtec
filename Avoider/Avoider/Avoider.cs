@@ -37,43 +37,44 @@ namespace Avoider
 
         private void OnGameObjectCreated(GameObject sender)
         {
+
+            if (!sender.IsAlly)
+                return;
+
             if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy")
             {
-                if (sender.IsAlly)
-                    trapsList.Add(sender);
+                trapsList.Add(sender);
             }
 
             if (sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
             {
-                if (sender.IsAlly)
-                    trapsList.Add(sender);
+                trapsList.Add(sender);
             }
 
             if (sender.Name == "Nidalee_Base_W_TC_Green.troy")
             {
-                if (sender.IsAlly)
-                    trapsList.Add(sender);
+                trapsList.Add(sender);
             }
         }
 
         private void OnGameObjectDestroyed(GameObject sender)
         {
+            if (!sender.IsAlly)
+                return;
+
             if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy")
             {
-                if (sender.IsAlly)
-                    trapsList.Remove(sender);
+                trapsList.Remove(sender);
             }
 
             if (sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
             {
-                if (sender.IsAlly)
-                    trapsList.Remove(sender);
+                trapsList.Remove(sender);
             }
 
             if (sender.Name == "Nidalee_Base_W_TC_Green.troy")
             {
-                if (sender.IsAlly)
-                    trapsList.Remove(sender);
+                trapsList.Remove(sender);
             }
         }
 
