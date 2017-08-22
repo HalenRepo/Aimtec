@@ -48,10 +48,15 @@ namespace Avoider
 
             if (sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
             {
-                trapsList.Add(sender);
+                //trapsList.Add(sender);
             }
 
             if (sender.Name == "Nidalee_Base_W_TC_Green.troy")
+            {
+                trapsList.Add(sender);
+            }
+
+            if (sender.Name == "Teemo_Base_R_CollisionBox_Ring.troy")
             {
                 trapsList.Add(sender);
             }
@@ -60,7 +65,7 @@ namespace Avoider
         private void OnGameObjectDestroyed(GameObject sender)
         {
             if (!sender.IsAlly)
-                return;
+                 return;
 
             if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy")
             {
@@ -73,6 +78,11 @@ namespace Avoider
             }
 
             if (sender.Name == "Nidalee_Base_W_TC_Green.troy")
+            {
+                trapsList.Remove(sender);
+            }
+
+            if (sender.Name == "Teemo_Base_R_CollisionBox_Ring.troy")
             {
                 trapsList.Remove(sender);
             }
@@ -122,6 +132,12 @@ namespace Avoider
 
                 //nidalee trap
                 if (trapsList[i].Name == "Nidalee_Base_W_TC_Green.troy" && Player.Distance(trapsList[i]) < 200)
+                {
+                    Avoid(trapsList[i].Position, 200, trapsList[i]);
+                }
+
+                //Teemo shroom
+                if (trapsList[i].Name == "Teemo_Base_R_CollisionBox_Ring.troy" && Player.Distance(trapsList[i]) < 200)
                 {
                     Avoid(trapsList[i].Position, 200, trapsList[i]);
                 }
