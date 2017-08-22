@@ -19,6 +19,8 @@ namespace Avoider
 
         public static List<GameObject> trapsList = new List<GameObject>();
 
+        public static bool avoiding;
+
         public Avoider()
         {
             Menu.Add(new MenuKeyBind("Key", "Auto Avoid", Aimtec.SDK.Util.KeyCode.N, KeybindType.Toggle));
@@ -31,6 +33,7 @@ namespace Avoider
             Menu.Add(Draw);
             Menu.Attach();
             Game.OnUpdate += Game_OnUpdate;
+            Orbwalker.Implementation.PreAttack += Orbwalker_OnPreAttack;
             GameObject.OnCreate += OnGameObjectCreated;
             GameObject.OnDestroy += OnGameObjectDestroyed;
         }
@@ -48,7 +51,7 @@ namespace Avoider
 
             if (sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
             {
-                //trapsList.Add(sender);
+                trapsList.Add(sender);
             }
 
             if (sender.Name == "Nidalee_Base_W_TC_Green.troy")
@@ -65,7 +68,7 @@ namespace Avoider
         private void OnGameObjectDestroyed(GameObject sender)
         {
             if (!sender.IsAlly)
-                 return;
+                return;
 
             if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy")
             {
@@ -74,7 +77,7 @@ namespace Avoider
 
             if (sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
             {
-                //trapsList.Remove(sender);
+                trapsList.Remove(sender);
             }
 
             if (sender.Name == "Nidalee_Base_W_TC_Green.troy")
@@ -88,27 +91,43 @@ namespace Avoider
             }
         }
 
+        public static void Orbwalker_OnPreAttack(object sender, PreAttackEventArgs args)
+        {
+            if (Orbwalker.Implementation.Mode == OrbwalkingMode.None)
+                return;
+
+            //Fix stuttering when attempting to auto attack whilst avoiding.
+            if (avoiding)
+                args.Cancel = true; //Block orbwalking
+
+            avoiding = false;
+        }
+
         private void Game_OnUpdate()
         {
             if (Player.IsDead || !Menu["Key"].Enabled)
                 return;
 
+
+
             /*foreach (var obj in GameObjects.AllGameObjects.Where(obj => obj.Team == Player.Team && obj.IsValid))
             {
                 if (Player.Distance(obj) > 1000)
                     continue;
-
                 //supports caitlyn trap, teemo trap, nidalee trap. WILL NOT AVOID JINX TRAP!
                 if (obj.Name.ToLower().Contains("cupcake trap") || obj.Name.ToLower().Contains("noxious trap"))
                 {
                     if (Player.Distance(obj) < 200)
                         Avoid(obj.Position, 200);
-
                     if (Menu["Object"].Enabled)
                         Render.Circle(obj.Position, 100, 30, Color.Red);
                 }
             }*/
 
+            if (Player.HasBuffOfType(BuffType.Stun) || Player.HasBuffOfType(BuffType.Snare))
+            {
+                return;
+            }
 
             for (var i = 0; i < trapsList.Count; i++)
             {
@@ -116,7 +135,7 @@ namespace Avoider
                     continue;
 
                 if (Menu["Object"].Enabled)
-                 Render.Circle(trapsList[i].Position, 65, 30, Color.Red);
+                    Render.Circle(trapsList[i].Position, 65, 30, Color.Red);
 
                 //caitlyn trap
                 if (trapsList[i].Name == "Caitlyn_Base_W_Indicator_SizeRing.troy" && Player.Distance(trapsList[i]) < 200)
@@ -125,9 +144,9 @@ namespace Avoider
                 }
 
                 //jinx trap
-                if (trapsList[i].Name == "Jinx_Base_E_Mine_Ready_Green.troy" && Player.Distance(trapsList[i]) < 200)
+                if (trapsList[i].Name == "Jinx_Base_E_Mine_Ready_Green.troy" && Player.Distance(trapsList[i]) < 220)
                 {
-                    //Avoid(trapsList[i].Position, 200, trapsList[i]);
+                    Avoid(trapsList[i].Position, 220, trapsList[i]);
                 }
 
                 //nidalee trap
@@ -142,6 +161,7 @@ namespace Avoider
                     Avoid(trapsList[i].Position, 200, trapsList[i]);
                 }
 
+
             }
         }
 
@@ -151,6 +171,10 @@ namespace Avoider
             for (var i = 1; i <= 360; i++)
             {
                 var angle = i * 2 * Math.PI / 360; //angle = i * 2 * Math.PI / 360;
+
+                if (trap.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
+                    angle = i * Math.PI / 360;
+
                 var point = new Vector3(position.X + radius * (float)Math.Cos(angle), position.Y + radius * (float)Math.Sin(angle), position.Z + radius * (float)Math.Sin(angle));
 
                 points.Add(point);
@@ -165,6 +189,7 @@ namespace Avoider
 
         private static void Avoid(Vector3 position, float range, GameObject trap)
         {
+            avoiding = true;
             //var trapPositions = trapsList.Select(x => x.ServerPosition).ToArray();
 
             var nextPoints = Pathing(100, Player.Position, trap);
@@ -175,6 +200,7 @@ namespace Avoider
             {
                 if (Menu["Pathing"].Enabled)
                     Render.Circle(getPoint, 30, 30, Color.LightBlue);
+
                 Orbwalker.Implementation.Move(getPoint);
             }
         }
