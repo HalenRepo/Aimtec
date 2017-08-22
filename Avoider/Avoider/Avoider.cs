@@ -105,8 +105,10 @@ namespace Avoider
                 if (Player.Distance(trapsList[i]) > 1000)
                     continue;
 
-                //if (Menu["Object"].Enabled)
-                // Render.Circle(trapsList[i].Position, 65, 30, Color.Red);
+                if (Menu["Object"].Enabled)
+                 Render.Circle(trapsList[i].Position, 65, 30, Color.Red);
+
+
 
                 if (Player.Distance(trapsList[i]) < 200 && Player.Distance(trapsList[i]) > 75 && !Player.HasBuffOfType(BuffType.Snare))
                 {
@@ -122,8 +124,6 @@ namespace Avoider
                     if (trapsList[i].Name == "Jinx_Base_E_Mine_Ready_Green.troy")
                     {
                         Avoid(trapsList[i].Position, 200, trapsList[i]);
-                        Render.Circle(trapsList[i].Position, 65, 30, Color.Red);
-
                     }
                     break;
                 }
