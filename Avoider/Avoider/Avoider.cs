@@ -17,6 +17,8 @@ namespace Avoider
         public static Menu Menu = new Menu("Avoider", "Avoider", true);
         private static Obj_AI_Hero Player => ObjectManager.GetLocalPlayer();
 
+        public static List<String> supportedTraps = new List<String>();
+
         public static List<GameObject> trapsList = new List<GameObject>();
 
         public static bool avoiding;
@@ -36,6 +38,8 @@ namespace Avoider
             Orbwalker.Implementation.PreAttack += Orbwalker_OnPreAttack;
             GameObject.OnCreate += OnGameObjectCreated;
             GameObject.OnDestroy += OnGameObjectDestroyed;
+
+            Obj_AI_Base.OnIssueOrder += OnIssueOrder;
         }
 
         private void OnGameObjectCreated(GameObject sender)
@@ -44,24 +48,34 @@ namespace Avoider
             if (!sender.IsAlly)
                 return;
 
-            if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy")
+            //Supports: Caitlyn trap, Jinx trap, Nidalee trap, Teemo trap
+            if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy" || sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy" 
+                || sender.Name == "Nidalee_Base_W_TC_Green.troy"|| sender.Name == "Teemo_Base_R_CollisionBox_Ring.troy")
             {
                 trapsList.Add(sender);
             }
+        }
 
-            if (sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
-            {
-                trapsList.Add(sender);
-            }
+        private static void OnIssueOrder(Obj_AI_Base sender, Obj_AI_BaseIssueOrderEventArgs args)
+        {
+            if (!sender.IsMe)
+                return;
 
-            if (sender.Name == "Nidalee_Base_W_TC_Green.troy")
+            //Re-check the position for a trap! Occurs with mostly traps close together.
+            if (args.OrderType == OrderType.MoveTo)
             {
-                trapsList.Add(sender);
-            }
+                if (trapsList == null)
+                    return;
 
-            if (sender.Name == "Teemo_Base_R_CollisionBox_Ring.troy")
-            {
-                trapsList.Add(sender);
+                var movePos = args.Position.To2D();
+
+                for (var i = 0; i < trapsList.Count; i++)
+                {
+                    if (movePos.Distance(trapsList[i]) < Player.BoundingRadius)
+                    {
+                        args.ProcessEvent = false;
+                    }
+                }
             }
         }
 
@@ -70,22 +84,8 @@ namespace Avoider
             if (!sender.IsAlly)
                 return;
 
-            if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy")
-            {
-                trapsList.Remove(sender);
-            }
-
-            if (sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
-            {
-                trapsList.Remove(sender);
-            }
-
-            if (sender.Name == "Nidalee_Base_W_TC_Green.troy")
-            {
-                trapsList.Remove(sender);
-            }
-
-            if (sender.Name == "Teemo_Base_R_CollisionBox_Ring.troy")
+            if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy" || sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy"
+                || sender.Name == "Nidalee_Base_W_TC_Green.troy" || sender.Name == "Teemo_Base_R_CollisionBox_Ring.troy")
             {
                 trapsList.Remove(sender);
             }
@@ -98,7 +98,7 @@ namespace Avoider
 
             //Fix stuttering when attempting to auto attack whilst avoiding.
             if (avoiding)
-                args.Cancel = true; //Block orbwalking
+                args.Cancel = true;
 
             avoiding = false;
         }
@@ -107,22 +107,6 @@ namespace Avoider
         {
             if (Player.IsDead || !Menu["Key"].Enabled)
                 return;
-
-
-
-            /*foreach (var obj in GameObjects.AllGameObjects.Where(obj => obj.Team == Player.Team && obj.IsValid))
-            {
-                if (Player.Distance(obj) > 1000)
-                    continue;
-                //supports caitlyn trap, teemo trap, nidalee trap. WILL NOT AVOID JINX TRAP!
-                if (obj.Name.ToLower().Contains("cupcake trap") || obj.Name.ToLower().Contains("noxious trap"))
-                {
-                    if (Player.Distance(obj) < 200)
-                        Avoid(obj.Position, 200);
-                    if (Menu["Object"].Enabled)
-                        Render.Circle(obj.Position, 100, 30, Color.Red);
-                }
-            }*/
 
             if (Player.HasBuffOfType(BuffType.Stun) || Player.HasBuffOfType(BuffType.Snare))
             {
@@ -137,31 +121,19 @@ namespace Avoider
                 if (Menu["Object"].Enabled)
                     Render.Circle(trapsList[i].Position, 65, 30, Color.Red);
 
-                //caitlyn trap
-                if (trapsList[i].Name == "Caitlyn_Base_W_Indicator_SizeRing.troy" && Player.Distance(trapsList[i]) < 200)
+                if (Player.Distance(trapsList[i]) < 200)
                 {
-                    Avoid(trapsList[i].Position, 200, trapsList[i]);
+                    if (trapsList[i].Name == "Caitlyn_Base_W_Indicator_SizeRing.troy" || trapsList[i].Name == "Nidalee_Base_W_TC_Green.troy" 
+                        || trapsList[i].Name == "Teemo_Base_R_CollisionBox_Ring.troy")
+                    {
+                        Avoid(trapsList[i].Position, 200, trapsList[i]);
+                    }
+
+                    if (trapsList[i].Name == "Jinx_Base_E_Mine_Ready_Green.troy")
+                    {
+                        Avoid(trapsList[i].Position, 220, trapsList[i]);
+                    }
                 }
-
-                //jinx trap
-                if (trapsList[i].Name == "Jinx_Base_E_Mine_Ready_Green.troy" && Player.Distance(trapsList[i]) < 220)
-                {
-                    Avoid(trapsList[i].Position, 220, trapsList[i]);
-                }
-
-                //nidalee trap
-                if (trapsList[i].Name == "Nidalee_Base_W_TC_Green.troy" && Player.Distance(trapsList[i]) < 200)
-                {
-                    Avoid(trapsList[i].Position, 200, trapsList[i]);
-                }
-
-                //Teemo shroom
-                if (trapsList[i].Name == "Teemo_Base_R_CollisionBox_Ring.troy" && Player.Distance(trapsList[i]) < 200)
-                {
-                    Avoid(trapsList[i].Position, 200, trapsList[i]);
-                }
-
-
             }
         }
 
@@ -182,18 +154,10 @@ namespace Avoider
             return points;
         }
 
-        public static Vector3 Perpendicular(Vector3 v)
-        {
-            return new Vector3(-v.Z, v.Y, v.X);
-        }
-
         private static void Avoid(Vector3 position, float range, GameObject trap)
         {
             avoiding = true;
-            //var trapPositions = trapsList.Select(x => x.ServerPosition).ToArray();
-
             var nextPoints = Pathing(100, Player.Position, trap);
-
             var getPoint = nextPoints.Where(x => x.Distance(position) > range).OrderBy(y => y.Distance(Game.CursorPos)).FirstOrDefault();
 
             if (getPoint != null)
