@@ -17,8 +17,6 @@ namespace Avoider
         public static Menu Menu = new Menu("Avoider", "Avoider", true);
         private static Obj_AI_Hero Player => ObjectManager.GetLocalPlayer();
 
-        public static List<String> supportedTraps = new List<String>();
-
         public static List<GameObject> trapsList = new List<GameObject>();
 
         public static bool avoiding;
@@ -30,7 +28,7 @@ namespace Avoider
             var Draw = new Menu("Draw", "Drawings");
             {
                 Draw.Add(new MenuBool("Object", "Traps"));
-                Draw.Add(new MenuBool("Pathing", "Pathing"));
+                Draw.Add(new MenuBool("Pathing", "Pathing", false));
             }
             Menu.Add(Draw);
             Menu.Attach();
@@ -44,13 +42,17 @@ namespace Avoider
 
         private void OnGameObjectCreated(GameObject sender)
         {
+            /*if (sender.Name.ToLower().Contains("trap"))
+                Console.WriteLine(Game.ClockTime + "- " + sender.Name + " | isAlly: " + sender.IsAlly + " | Team" + sender.Team);*/
 
-            if (!sender.IsAlly)
+            if (sender.IsAlly)
+            {
                 return;
+            }
 
             //Supports: Caitlyn trap, Jinx trap, Nidalee trap, Teemo trap
-            if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy" || sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy" 
-                || sender.Name == "Nidalee_Base_W_TC_Green.troy"|| sender.Name == "Teemo_Base_R_CollisionBox_Ring.troy")
+            if (sender.Name == "caitlyn_Base_yordleTrap_idle_red.troy" || sender.Name == "Cupcake Trap" 
+                || sender.Name == "Noxious Trap")
             {
                 trapsList.Add(sender);
             }
@@ -81,11 +83,11 @@ namespace Avoider
 
         private void OnGameObjectDestroyed(GameObject sender)
         {
-            if (!sender.IsAlly)
+            if (sender.IsAlly)
                 return;
 
-            if (sender.Name == "Caitlyn_Base_W_Indicator_SizeRing.troy" || sender.Name == "Jinx_Base_E_Mine_Ready_Green.troy"
-                || sender.Name == "Nidalee_Base_W_TC_Green.troy" || sender.Name == "Teemo_Base_R_CollisionBox_Ring.troy")
+            if (sender.Name == "caitlyn_Base_yordleTrap_idle_red.troy" || sender.Name == "Cupcake Trap"
+                || sender.Name == "Noxious Trap")
             {
                 trapsList.Remove(sender);
             }
@@ -123,13 +125,12 @@ namespace Avoider
 
                 if (Player.Distance(trapsList[i]) < 200)
                 {
-                    if (trapsList[i].Name == "Caitlyn_Base_W_Indicator_SizeRing.troy" || trapsList[i].Name == "Nidalee_Base_W_TC_Green.troy" 
-                        || trapsList[i].Name == "Teemo_Base_R_CollisionBox_Ring.troy")
+                    if (trapsList[i].Name == "caitlyn_Base_yordleTrap_idle_red.troy" || trapsList[i].Name == "Noxious Trap")
                     {
                         Avoid(trapsList[i].Position, 200, trapsList[i]);
                     }
 
-                    if (trapsList[i].Name == "Jinx_Base_E_Mine_Ready_Green.troy")
+                    if (trapsList[i].Name == "Cupcake Trap")
                     {
                         Avoid(trapsList[i].Position, 220, trapsList[i]);
                     }
@@ -144,7 +145,7 @@ namespace Avoider
             {
                 var angle = i * 2 * Math.PI / 360; //angle = i * 2 * Math.PI / 360;
 
-                if (trap.Name == "Jinx_Base_E_Mine_Ready_Green.troy")
+                if (trap.Name == "Cupcake Trap")
                     angle = i * Math.PI / 360;
 
                 var point = new Vector3(position.X + radius * (float)Math.Cos(angle), position.Y + radius * (float)Math.Sin(angle), position.Z + radius * (float)Math.Sin(angle));
