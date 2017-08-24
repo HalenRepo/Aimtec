@@ -198,6 +198,14 @@ namespace HeavenSeries
         //Extend the fizz ult for better accuracy
         public static void CastRSmart(Obj_AI_Hero target)
         {
+            if (Champions.Fizz.MenuClass.combormenu["onlyrkill"].Enabled)
+            {
+                if (!CanKillWithUltCombo(target))
+                {
+                    return;
+                }
+            }
+
             var castPosition = R.GetPrediction(target).UnitPosition;
             castPosition = Player.ServerPosition.Extend(castPosition, R.Range);
 

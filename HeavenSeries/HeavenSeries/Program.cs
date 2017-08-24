@@ -58,8 +58,6 @@
 
                 default: Console.WriteLine("Champion not supported.");
                     break;
-
-
             }
 
         }

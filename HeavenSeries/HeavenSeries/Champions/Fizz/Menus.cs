@@ -54,6 +54,7 @@ namespace HeavenSeries
                     Champions.Fizz.MenuClass.combormenu = new Menu("combormenu", "R");
                     {
                         Champions.Fizz.MenuClass.combormenu.Add(new MenuBool("user", "Use R"));
+                        Champions.Fizz.MenuClass.combormenu.Add(new MenuBool("onlyrkill", "Only R if Killable"));
                         Champions.Fizz.MenuClass.comboronmenu = new Menu("useronmenu", "Use R on: ");
                         
                     } 
