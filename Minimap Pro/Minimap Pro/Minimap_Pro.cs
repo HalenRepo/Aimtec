@@ -10,6 +10,7 @@ using Aimtec.SDK.Util.Cache;
 
 using Aimtec.SDK.Menu;
 using Aimtec.SDK.Menu.Components;
+using Aimtec.SDK.Util;
 
 namespace MiniMap_Pro
 {
@@ -72,6 +73,7 @@ namespace MiniMap_Pro
             var championtracker = new Menu("ChampionTracker", "Champion Tracker")
             {
                 new MenuBool("Toggle", "Enabled"),
+                new MenuSlider("radiuslimit", "Max Circle Size", 900),
             };
             Menu.Add(championtracker);
 
@@ -90,7 +92,7 @@ namespace MiniMap_Pro
             Game.OnUpdate += Game_OnUpdate;
             GameObject.OnCreate += OnGameObjectCreated;
             GameObject.OnDestroy += OnGameObjectDestroyed;
-            //Obj_AI_Base.OnTeleport += OnTeleport;
+            Obj_AI_Base.OnTeleport += OnTeleport;
 
             //For champion tracker
             foreach (var enemy in GameObjects.EnemyHeroes)
@@ -106,10 +108,29 @@ namespace MiniMap_Pro
 
         }
 
-        /*private void OnTeleport(Obj_AI_Base sender, Obj_AI_BaseTeleportEventArgs args)
+        private void OnTeleport(Obj_AI_Base sender, Obj_AI_BaseTeleportEventArgs args)
         {
+            if (sender.IsAlly)
+                return;
 
-        }*/
+            //normal recall 8 sec
+            if (args.Name.ToLower() == "recall")
+            {
+                //Console.WriteLine(Game.ClockTime + " | " + sender.Name.ToLower() + " is recalling.");
+
+                var TeleportingChamp = _lastPositions.FirstOrDefault(t => t.Champ.Name.ToLower().Equals(sender.Name.ToLower()));
+                TeleportingChamp.IsTeleporting = true;
+                DelayAction.Queue(8000, () => TeleportingChamp.Teleported = true);
+            }
+
+            //baron recall 4 sec
+            if (args.Name.ToLower() == "superrecall")
+            {
+                var TeleportingChamp = _lastPositions.FirstOrDefault(t => t.Champ.Name.ToLower().Equals(sender.Name.ToLower()));
+                TeleportingChamp.IsTeleporting = true;
+                DelayAction.Queue(4000, () => TeleportingChamp.Teleported = true);
+            }
+        }
 
         private void OnGameObjectCreated(GameObject sender)
         {
@@ -324,7 +345,35 @@ namespace MiniMap_Pro
                     }
                     if (!champtrack.Champ.IsVisible && !champtrack.Champ.IsDead)
                     {
-                        var pos = champtrack.Teleported ? champtrack.Champ.Orientation : champtrack.LastPosition;
+                        Vector3 Fountain = new Vector3(14340, 171.9777f, 14390);
+                        if (Game.MapId == GameMapId.SummonersRift)
+                        {
+                            switch (champtrack.Champ.Team)
+                            {
+                                case GameObjectTeam.Order:
+                                    Fountain = new Vector3(396, 185.1325f, 462);
+                                    break;
+
+                                case GameObjectTeam.Chaos:
+                                    Fountain = new Vector3(14340, 171.9777f, 14390);
+                                    break;
+                            }
+                        }
+                        else if (Game.MapId == GameMapId.TwistedTreeline)
+                        {
+                            switch (champtrack.Champ.Team)
+                            {
+                                case GameObjectTeam.Order:
+                                    Fountain = new Vector3(1058, 150.8638f, 7297);
+                                    break;
+
+                                case GameObjectTeam.Chaos:
+                                    Fountain = new Vector3(14320, 151.9291f, 7235);
+                                    break;
+                            }
+                        }
+
+                        var pos = champtrack.Teleported ? Fountain : champtrack.LastPosition;
                         Render.WorldToMinimap(pos, out var mpPos);
                         Render.WorldToScreen(pos, out var mPos);
 
@@ -349,7 +398,7 @@ namespace MiniMap_Pro
                                     break;
 
                                 case 4:
-                                    trackColor = Color.Blue;
+                                    trackColor = Color.LightBlue;
                                     break;
 
                                 case 5:
@@ -357,7 +406,7 @@ namespace MiniMap_Pro
                                     break;
                             }
 
-                            if (radius <= 800)
+                            if (radius <= Menu["ChampionTracker"]["radiuslimit"].Value) //800, now menu default 900
                             {
                                 //you can draw the circle to screen here
 
