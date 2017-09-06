@@ -73,18 +73,8 @@ namespace MiniMap_Pro
             var championtracker = new Menu("ChampionTracker", "Champion Tracker")
             {
                 new MenuBool("Toggle", "Enabled"),
-                new MenuSlider("radiuslimitslider", "Max Circle Size", 900, 1, 1200),
             };
             Menu.Add(championtracker);
-
-            //Submenu2 of championtracker
-            var championtrackersub2 = new Menu("champlist", "Champion List");
-            {
-                championtrackersub2.Add(new MenuBool("cToggle", "Enabled"));
-                championtrackersub2.Add(new MenuSlider("PosX", "X Position", 1500, 1, 2500));
-                championtrackersub2.Add(new MenuSlider("PosY", "Y Position", 800, 1, 1800));
-            }
-            championtracker.Add(championtrackersub2);
 
             //Submenu of championtracker
             var championtrackersub = new Menu("whitelist", "Whitelist");
@@ -93,6 +83,19 @@ namespace MiniMap_Pro
                     championtrackersub.Add(new MenuBool(enemies.ChampionName.ToLower(), enemies.ChampionName));
             }
             championtracker.Add(championtrackersub);
+
+
+            //Submenu2 of championtracker
+            var championtrackersub2 = new Menu("champlist", "Champion List");
+            {
+                championtrackersub2.Add(new MenuBool("cToggle", "Enabled"));
+                championtrackersub2.Add(new MenuSlider("PosX", "X Position", 1500, 1, 1900));
+                championtrackersub2.Add(new MenuSlider("PosY", "Y Position", 800, 1, 1200));
+            }
+            championtracker.Add(championtrackersub2);
+
+            var circlesizemenu = new MenuSlider("radiuslimitslider", "Max Circle Size", 900, 1, 1200);
+            championtracker.Add(circlesizemenu);
 
             Menu.Attach();
             #endregion
@@ -432,8 +435,6 @@ namespace MiniMap_Pro
 
                             if (radius <= Menu["ChampionTracker"]["radiuslimitslider"].Value) //800, now menu default 900
                             {
-                                //you can draw the circle to screen here
-
                                 //draw to minimap
                                 Vector2 le;
                                 Render.WorldToMinimap(pos, out le);
