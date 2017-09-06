@@ -73,9 +73,18 @@ namespace MiniMap_Pro
             var championtracker = new Menu("ChampionTracker", "Champion Tracker")
             {
                 new MenuBool("Toggle", "Enabled"),
-                new MenuSlider("radiuslimit", "Max Circle Size", 900),
+                new MenuSlider("radiuslimitslider", "Max Circle Size", 900, 1, 1200),
             };
             Menu.Add(championtracker);
+
+            //Submenu2 of championtracker
+            var championtrackersub2 = new Menu("champlist", "Champion List");
+            {
+                championtrackersub2.Add(new MenuBool("cToggle", "Enabled"));
+                championtrackersub2.Add(new MenuSlider("PosX", "X Position", 1500, 1, 2500));
+                championtrackersub2.Add(new MenuSlider("PosY", "Y Position", 800, 1, 1800));
+            }
+            championtracker.Add(championtrackersub2);
 
             //Submenu of championtracker
             var championtrackersub = new Menu("whitelist", "Whitelist");
@@ -343,6 +352,21 @@ namespace MiniMap_Pro
                             champtrack.LastSeen = Game.ClockTime;
                         }
                     }
+
+                    //Draw SS List
+                    if (Menu["ChampionTracker"]["champlist"]["cToggle"].Enabled)
+                    {
+                        if (champtrack.Champ.IsVisible)
+                        {
+                            Render.Text(Menu["ChampionTracker"]["champlist"]["PosX"].Value, Menu["ChampionTracker"]["champlist"]["PosY"].Value + (index * 25), Color.LightGreen, champtrack.Champ.ChampionName + ": Visible");
+                        }
+                        else
+                        {
+                            Render.Text(Menu["ChampionTracker"]["champlist"]["PosX"].Value, Menu["ChampionTracker"]["champlist"]["PosY"].Value + (index * 25), Color.Red, champtrack.Champ.ChampionName + ": " + (int)Math.Abs(Game.ClockTime - champtrack.LastSeen - 1));
+                        }
+                        
+                    }
+
                     if (!champtrack.Champ.IsVisible && !champtrack.Champ.IsDead)
                     {
                         Vector3 Fountain = new Vector3(14340, 171.9777f, 14390);
@@ -406,7 +430,7 @@ namespace MiniMap_Pro
                                     break;
                             }
 
-                            if (radius <= Menu["ChampionTracker"]["radiuslimit"].Value) //800, now menu default 900
+                            if (radius <= Menu["ChampionTracker"]["radiuslimitslider"].Value) //800, now menu default 900
                             {
                                 //you can draw the circle to screen here
 
