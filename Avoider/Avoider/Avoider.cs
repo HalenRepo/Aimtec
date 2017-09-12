@@ -78,7 +78,7 @@ namespace Avoider
 
         private static void OnIssueOrder(Obj_AI_Base sender, Obj_AI_BaseIssueOrderEventArgs args)
         {
-            if (!sender.IsMe)
+            if (!sender.IsMe || !Menu["Key"].Enabled)
                 return;
 
             //Re-check the position for a trap! Occurs with mostly traps close together.
