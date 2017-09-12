@@ -13,18 +13,7 @@ namespace Avoider
 
         private static void GameEvents_GameStart()
         {
-
-            switch (ObjectManager.GetLocalPlayer().ChampionName)
-            {
-                default:
-                    var s = new Avoider();
-                    break;
-
-
-
-
-            }
-
+            new Avoider();
         }
     }
 }

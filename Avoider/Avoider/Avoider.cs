@@ -21,6 +21,8 @@ namespace Avoider
 
         public static bool avoiding;
 
+        public static float FizzRadius;
+
         public Avoider()
         {
             Menu.Add(new MenuKeyBind("Key", "Auto Avoid", Aimtec.SDK.Util.KeyCode.N, KeybindType.Toggle));
@@ -38,6 +40,7 @@ namespace Avoider
             GameObject.OnDestroy += OnGameObjectDestroyed;
 
             Obj_AI_Base.OnIssueOrder += OnIssueOrder;
+            Obj_AI_Base.OnProcessSpellCast += OnProcessSpellCast;
         }
 
         private void OnGameObjectCreated(GameObject sender)
@@ -45,18 +48,33 @@ namespace Avoider
             /*if (sender.Name.ToLower().Contains("trap"))
                 Console.WriteLine(Game.ClockTime + "- " + sender.Name + " | isAlly: " + sender.IsAlly + " | Team" + sender.Team);*/
 
-            if (sender.IsAlly)
+            /*if (sender.IsAlly)
             {
                 return;
-            }
+            }*/
+
+            //Console.WriteLine(Game.ClockTime + " " + sender.Name);
 
             //Supports: Caitlyn trap, Jinx trap, Nidalee trap, Teemo trap
             if (sender.Name == "caitlyn_Base_yordleTrap_idle_red.troy" || sender.Name == "Cupcake Trap" 
-                || sender.Name == "Noxious Trap")
+                || sender.Name == "Noxious Trap" /*|| sender.Name == "Fizz_Base_R_Ring_Green.troy"*/ || sender.Name == "Ziggs_Base_E_placedMine.troy")
             {
                 trapsList.Add(sender);
             }
         }
+
+        private void OnGameObjectDestroyed(GameObject sender)
+        {
+            if (sender.IsAlly)
+                return;
+
+            if (sender.Name == "caitlyn_Base_yordleTrap_idle_red.troy" || sender.Name == "Cupcake Trap"
+                || sender.Name == "Noxious Trap" /*|| sender.Name == "Fizz_Base_R_Ring_Green.troy"*/ || sender.Name == "Ziggs_Base_E_placedMine.troy")
+            {
+                trapsList.Remove(sender);
+            }
+        }
+
 
         private static void OnIssueOrder(Obj_AI_Base sender, Obj_AI_BaseIssueOrderEventArgs args)
         {
@@ -81,19 +99,28 @@ namespace Avoider
             }
         }
 
-        private void OnGameObjectDestroyed(GameObject sender)
-        {
-            if (sender.IsAlly)
-                return;
 
-            if (sender.Name == "caitlyn_Base_yordleTrap_idle_red.troy" || sender.Name == "Cupcake Trap"
-                || sender.Name == "Noxious Trap")
+        public void OnProcessSpellCast(Obj_AI_Base sender, Obj_AI_BaseMissileClientDataEventArgs args)
+        {
+            //To get Fizz R distance which determines radius
+           /* if (sender.UnitSkinName == "Fizz")
             {
-                trapsList.Remove(sender);
-            }
+                if (args.SpellSlot == SpellSlot.R)
+                {
+                    if (args.End.Distance(args.Start) > 910)
+                        FizzRadius = 450;
+                    
+
+                    if (args.End.Distance(args.Start) >= 455 && args.End.Distance(args.Start) <= 910)
+                        FizzRadius = 320;
+
+                    if (args.End.Distance(args.Start) >= 455 && args.End.Distance(args.Start) <= 910)
+                        FizzRadius = 200;
+                }
+            }*/
         }
 
-        public static void Orbwalker_OnPreAttack(object sender, PreAttackEventArgs args)
+            public static void Orbwalker_OnPreAttack(object sender, PreAttackEventArgs args)
         {
             if (Orbwalker.Implementation.Mode == OrbwalkingMode.None)
                 return;
@@ -130,10 +157,15 @@ namespace Avoider
                         Avoid(trapsList[i].Position, 200, trapsList[i]);
                     }
 
-                    if (trapsList[i].Name == "Cupcake Trap")
+                    if (trapsList[i].Name == "Cupcake Trap" || trapsList[i].Name == "Ziggs_Base_E_placedMine.troy")
                     {
                         Avoid(trapsList[i].Position, 220, trapsList[i]);
                     }
+
+                    /*if (trapsList[i].Name  == "Fizz_Base_R_Ring_Green.troy")
+                    {
+                        Avoid(trapsList[i].Position, 220, trapsList[i]);
+                    }*/
                 }
             }
         }
@@ -145,7 +177,7 @@ namespace Avoider
             {
                 var angle = i * 2 * Math.PI / 360; //angle = i * 2 * Math.PI / 360;
 
-                if (trap.Name == "Cupcake Trap")
+                if (trap.Name == "Cupcake Trap" || trap.Name == "Ziggs_Base_E_placedMine.troy")
                     angle = i * Math.PI / 360;
 
                 var point = new Vector3(position.X + radius * (float)Math.Cos(angle), position.Y + radius * (float)Math.Sin(angle), position.Z + radius * (float)Math.Sin(angle));
