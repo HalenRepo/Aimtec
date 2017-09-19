@@ -100,7 +100,7 @@ namespace MiniMap_Pro
             Menu.Attach();
             #endregion
 
-            Render.OnPresent += Render_OnPresent;
+            //Render.OnPresent += Render_OnPresent;
             Game.OnUpdate += Game_OnUpdate;
             GameObject.OnCreate += OnGameObjectCreated;
             GameObject.OnDestroy += OnGameObjectDestroyed;
@@ -222,7 +222,8 @@ namespace MiniMap_Pro
                     //Console.WriteLine(pos);
                     var pos = turret.ServerPosition.ToMiniMapPosition();
                     int health = (int)turret.HealthPercent();
-                    Render.Text(pos, Color.FromArgb(200, 255, 255, 255), health + "%", RenderTextFlags.VerticalTop);
+                    //Render.Text(pos, Color.FromArgb(200, 255, 255, 255), health + "%", RenderTextFlags.VerticalTop);
+                    Render.Text(health + "%", pos, RenderTextFlags.VerticalTop, Color.FromArgb(200, 255, 255, 255));
                 }
 
                 //Inhib health
@@ -242,7 +243,8 @@ namespace MiniMap_Pro
 
                     var pos = inhibitor.ServerPosition.ToMiniMapPosition();
                     int health = (int)inhibitor.HealthPercent();
-                    Render.Text(pos, Color.FromArgb(200, 255, 255, 255), health + "%", RenderTextFlags.VerticalTop);
+                    //Render.Text(pos, Color.FromArgb(200, 255, 255, 255), health + "%", RenderTextFlags.VerticalTop);
+                    Render.Text(health + "%", pos, RenderTextFlags.VerticalTop, Color.FromArgb(200, 255, 255, 255));
                 }
             }     
             #endregion
@@ -296,7 +298,8 @@ namespace MiniMap_Pro
                             continue;
                         }
 
-                        Render.Text(camp.MinimapPosition, selectedColor, text, RenderTextFlags.HorizontalCenter);
+                        //Render.Text(camp.MinimapPosition, selectedColor, text, RenderTextFlags.HorizontalCenter);
+                        Render.Text(text, camp.MinimapPosition, RenderTextFlags.HorizontalCenter, selectedColor);
                     }
                 }
                 else //for later on in the game
@@ -318,7 +321,8 @@ namespace MiniMap_Pro
                             continue;
                         }
 
-                        Render.Text(camp.MinimapPosition, selectedColor, text, RenderTextFlags.HorizontalCenter);
+                        //Render.Text(camp.MinimapPosition, selectedColor, text, RenderTextFlags.HorizontalCenter);
+                        Render.Text(text, camp.MinimapPosition, RenderTextFlags.HorizontalCenter, selectedColor);
 
                     }
                 }
@@ -359,13 +363,16 @@ namespace MiniMap_Pro
                     //Draw SS List
                     if (Menu["ChampionTracker"]["champlist"]["cToggle"].Enabled)
                     {
+                        var listPos = new Vector2(Menu["ChampionTracker"]["champlist"]["PosX"].Value, Menu["ChampionTracker"]["champlist"]["PosY"].Value + (index * 25));
                         if (champtrack.Champ.IsVisible)
                         {
-                            Render.Text(Menu["ChampionTracker"]["champlist"]["PosX"].Value, Menu["ChampionTracker"]["champlist"]["PosY"].Value + (index * 25), Color.LightGreen, champtrack.Champ.ChampionName + ": Visible");
+                            //Render.Text(Menu["ChampionTracker"]["champlist"]["PosX"].Value, Menu["ChampionTracker"]["champlist"]["PosY"].Value + (index * 25), Color.LightGreen, champtrack.Champ.ChampionName + ": Visible");
+                            Render.Text(champtrack.Champ.ChampionName + ": Visible", listPos, RenderTextFlags.None, Color.LightGreen);
                         }
                         else
                         {
-                            Render.Text(Menu["ChampionTracker"]["champlist"]["PosX"].Value, Menu["ChampionTracker"]["champlist"]["PosY"].Value + (index * 25), Color.Red, champtrack.Champ.ChampionName + ": " + (int)Math.Abs(Game.ClockTime - champtrack.LastSeen - 1));
+                            //Render.Text(Menu["ChampionTracker"]["champlist"]["PosX"].Value, Menu["ChampionTracker"]["champlist"]["PosY"].Value + (index * 25), Color.Red, champtrack.Champ.ChampionName + ": " + (int)Math.Abs(Game.ClockTime - champtrack.LastSeen - 1));
+                            Render.Text(champtrack.Champ.ChampionName + ": " + (int)Math.Abs(Game.ClockTime - champtrack.LastSeen - 1), listPos, RenderTextFlags.None, Color.Red);
                         }
                         
                     }
@@ -438,7 +445,8 @@ namespace MiniMap_Pro
                                 //draw to minimap
                                 Vector2 le;
                                 Render.WorldToMinimap(pos, out le);
-                                Render.Text(le, trackColor, champtrack.Champ.ChampionName, RenderTextFlags.HorizontalCenter);
+                                //Render.Text(le, trackColor, champtrack.Champ.ChampionName, RenderTextFlags.HorizontalCenter);
+                                Render.Text(champtrack.Champ.ChampionName, le, RenderTextFlags.HorizontalCenter, trackColor);
                                 Draw2DCircle(le, radius, trackColor);
                             }
                         }
