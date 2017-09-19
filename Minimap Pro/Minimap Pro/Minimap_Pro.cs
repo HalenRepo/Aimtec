@@ -100,11 +100,11 @@ namespace MiniMap_Pro
             Menu.Attach();
             #endregion
 
-            //Render.OnPresent += Render_OnPresent;
             Game.OnUpdate += Game_OnUpdate;
             GameObject.OnCreate += OnGameObjectCreated;
             GameObject.OnDestroy += OnGameObjectDestroyed;
             Obj_AI_Base.OnTeleport += OnTeleport;
+            Render.OnPresent += Render_OnPresent;
 
             //For champion tracker
             foreach (var enemy in GameObjects.EnemyHeroes)
