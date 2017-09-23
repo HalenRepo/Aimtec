@@ -76,6 +76,9 @@ namespace MiniMap_Pro
             };
             Menu.Add(championtracker);
 
+            var circlesizemenu = new MenuSlider("radiuslimitslider", "Max Circle Size", 900, 1, 1200);
+            championtracker.Add(circlesizemenu);
+
             //Submenu of championtracker
             var championtrackersub = new Menu("whitelist", "Whitelist");
             {
@@ -94,8 +97,24 @@ namespace MiniMap_Pro
             }
             championtracker.Add(championtrackersub2);
 
-            var circlesizemenu = new MenuSlider("radiuslimitslider", "Max Circle Size", 900, 1, 1200);
-            championtracker.Add(circlesizemenu);
+
+
+            //submenu3 of championtracker - Awareness
+            var awareness = new Menu("Awareness", "Awareness Lines");
+            {
+                awareness.Add(new MenuBool("Toggle", "Enabled"));
+                awareness.Add(new MenuSlider("rangeMin", "Min. Range", 800, 1, 3000));
+                awareness.Add(new MenuSlider("rangeMax", "Max. Range", 2200, 1, 3000));
+            }
+            championtracker.Add(awareness);
+
+            //Submenu of Awareness
+            var awarenesssub = new Menu("whitelist", "Whitelist");
+            {
+                foreach (Obj_AI_Hero enemies in GameObjects.EnemyHeroes)
+                    awarenesssub.Add(new MenuBool(enemies.ChampionName.ToLower(), enemies.ChampionName));
+            }
+            awareness.Add(awarenesssub);
 
             Menu.Attach();
             #endregion
@@ -377,6 +396,30 @@ namespace MiniMap_Pro
                         
                     }
 
+                    //Select champion color
+                    switch (index)
+                    {
+                        case 0:
+                            trackColor = Color.Red;
+                            break;
+
+                        case 1:
+                            trackColor = Color.Orange;
+                            break;
+
+                        case 3:
+                            trackColor = Color.LightGreen;
+                            break;
+
+                        case 4:
+                            trackColor = Color.LightYellow;
+                            break;
+
+                        case 5:
+                            trackColor = Color.HotPink;
+                            break;
+                    }
+
                     if (!champtrack.Champ.IsVisible && !champtrack.Champ.IsDead)
                     {
                         Vector3 Fountain = new Vector3(14340, 171.9777f, 14390);
@@ -411,34 +454,9 @@ namespace MiniMap_Pro
                         Render.WorldToMinimap(pos, out var mpPos);
                         Render.WorldToScreen(pos, out var mPos);
 
-                        //Check if you want to draw ss circle [unimplemented] here
                         if (!champtrack.LastSeen.Equals(0f) && Game.ClockTime - champtrack.LastSeen > 3f)
                         {
                             var radius = Math.Abs((Game.ClockTime - champtrack.LastSeen - 1) * champtrack.Champ.MoveSpeed * 0.9f) / 100;
-
-                            //Select champion color
-                            switch (index)
-                            {
-                                case 0:
-                                    trackColor = Color.Red;
-                                    break;
-
-                                case 1:
-                                    trackColor = Color.Orange;
-                                    break;
-
-                                case 3:
-                                    trackColor = Color.LightGreen;
-                                    break;
-
-                                case 4:
-                                    trackColor = Color.LightBlue;
-                                    break;
-
-                                case 5:
-                                    trackColor = Color.HotPink;
-                                    break;
-                            }
 
                             if (radius <= Menu["ChampionTracker"]["radiuslimitslider"].Value) //800, now menu default 900
                             {
@@ -451,6 +469,23 @@ namespace MiniMap_Pro
                             }
                         }
                     }
+
+                    #region Awareness
+                    //Awareness
+                    if (Menu["ChampionTracker"]["Awareness"]["Toggle"].Enabled)
+                    {
+                        if (Menu["ChampionTracker"]["Awareness"]["whitelist"][champtrack.Champ.ChampionName.ToLower()].Enabled && champtrack.Champ.IsVisible &&
+                            Player.Distance(champtrack.Champ) >= Menu["ChampionTracker"]["Awareness"]["rangeMin"].Value && Player.Distance(champtrack.Champ) <= Menu["ChampionTracker"]["Awareness"]["rangeMax"].Value && !champtrack.Champ.IsDead)
+                        {
+                            //Render.Line(Player.Position.To2D(), champ.Position.To2D(), Color.Red);
+                            //Render.Line(Player.Position.X, Player.Position.Y, champ.Position.X, champ.Position.Y, Color.Red);
+                            Render.Line(Player.Position.ToScreenPosition(), champtrack.LastPosition.ToScreenPosition(), 5, true, trackColor);
+                            Render.WorldToScreen(champtrack.LastPosition, out Vector2 champScreenPos);
+                            Render.Text(champtrack.Champ.ChampionName, Player.Position.ToScreenPosition().Extend(champScreenPos, 150), RenderTextFlags.None, Color.White);
+                        }
+                    }
+
+                    #endregion
                 }
             }
             #endregion
@@ -528,7 +563,7 @@ namespace MiniMap_Pro
                 float x2 = (float)(centre.X + radius * Math.Cos((i + 1) / 20.0 * 2 * Math.PI));
                 float y2 = (float)(centre.Y + radius * Math.Sin((i + 1) / 20.0 * 2 * Math.PI));
 
-                Render.Line(x1, y1, x2, y2, color);
+                Render.Line(x1, y1, x2, y2, 2, true, color);
             }
         }
         #endregion
