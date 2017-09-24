@@ -102,7 +102,7 @@ namespace MiniMap_Pro
             //submenu3 of championtracker - Awareness
             var awareness = new Menu("Awareness", "Awareness Lines");
             {
-                awareness.Add(new MenuBool("Toggle", "Enabled"));
+                awareness.Add(new MenuBool("Toggle", "Enabled", false));
                 awareness.Add(new MenuSlider("rangeMin", "Min. Range", 800, 1, 3000));
                 awareness.Add(new MenuSlider("rangeMax", "Max. Range", 2200, 1, 3000));
             }
