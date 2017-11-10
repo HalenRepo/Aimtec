@@ -11,6 +11,8 @@ using Aimtec.SDK.Util.Cache;
 using Aimtec.SDK.Menu;
 using Aimtec.SDK.Menu.Components;
 using Aimtec.SDK.Util;
+using System.IO;
+using System.Drawing.Drawing2D;
 
 namespace MiniMap_Pro
 {
@@ -246,7 +248,7 @@ namespace MiniMap_Pro
                 }
 
                 //Inhib health
-                foreach (var inhibitor in ObjectManager.Get<Obj_BarracksDampener>().Where(t => t != null && t.IsValid && !t.IsDead && t.HealthPercent() < 100))
+                foreach (var inhibitor in ObjectManager.Get<obj_BarracksDampener>().Where(t => t != null && t.IsValid && !t.IsDead && t.HealthPercent() < 100))
                 {
                     if (!Menu["TurretHealth"]["Allies"]["inhibs"].Enabled)
                     {
